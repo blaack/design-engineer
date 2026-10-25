@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI 设计结构理论</title>
+  <style>
+    :root {
+      --bg: #f6efe4;
+      --paper: #fffdf8;
+      --paper-soft: #fff7ed;
+      --ink: #25211d;
+      --muted: #5f574e;
+      --soft: #8b7e72;
+      --line: #dfd0bd;
+      --line-strong: #c9b59f;
+      --accent: #d98270;
+      --accent-deep: #a85b4d;
+      --accent-soft: #f3ddd4;
+      --violet: #d8b76f;
+      --violet-soft: #fbf1d7;
+      --cyan: #7da896;
+      --cyan-soft: #e7f0ea;
+      --green: #7da896;
+      --green-soft: #e7f0ea;
+      --orange: #d8b76f;
+      --orange-soft: #fbf1d7;
+      --rose: #f3ddd4;
+      --rose-soft: #fff7ed;
+      --card: rgba(255, 253, 248, 0.96);
+      --card-soft: rgba(255, 248, 238, 0.9);
+      --shadow: 0 24px 70px rgba(73, 50, 28, 0.09);
+      --shadow-soft: 0 14px 38px rgba(73, 50, 28, 0.065);
+      --shadow-tiny: 0 8px 22px rgba(73, 50, 28, 0.045);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --max: 1680px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%, rgba(217, 130, 112, 0.15), transparent 28%),
+        radial-gradient(circle at 92% 9%, rgba(125, 168, 150, 0.14), transparent 30%),
+        radial-gradient(circle at 46% 42%, rgba(216, 183, 111, 0.08), transparent 34%),
+        linear-gradient(180deg, #fffaf2 0%, var(--bg) 52%, #fffaf2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.78;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.23;
+      background-image:
+        linear-gradient(rgba(210, 196, 178, 0.22) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(210, 196, 178, 0.16) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 82%);
+    }
+
+    a { color: inherit; }
+
+    .page {
+      position: relative;
+      width: min(var(--max), calc(100% - 48px));
+      margin: 0 auto;
+      padding: 24px 0 84px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+      margin: 0 0 28px;
+      padding: 14px 22px;
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.88);
+      box-shadow: 0 14px 34px rgba(73, 50, 28, 0.08);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 950;
+      letter-spacing: -0.035em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(217, 130, 112, 0.24);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255, 253, 248,0.95), transparent 34%),
+        linear-gradient(135deg, #fff7ec, #f3ddd4);
+      color: var(--accent-deep);
+      box-shadow: inset 0 -8px 16px rgba(217, 130, 112, 0.08);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .nav a {
+      padding: 8px 13px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      transition: 0.22s ease;
+    }
+
+    .nav a:hover {
+      color: var(--accent-deep);
+      background: rgba(243, 221, 212, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 660px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(420px, 0.97fr);
+      align-items: center;
+      gap: clamp(28px, 5vw, 86px);
+      padding: clamp(42px, 6vw, 92px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at 15% 12%, rgba(217,130,112,0.13), transparent 34%),
+        radial-gradient(circle at 86% 16%, rgba(125,168,150,0.11), transparent 34%),
+        linear-gradient(135deg, rgba(255, 253, 248,0.96), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "05";
+      position: absolute;
+      right: clamp(8px, 4vw, 64px);
+      bottom: -42px;
+      font-size: clamp(120px, 17vw, 280px);
+      font-weight: 950;
+      letter-spacing: -0.075em;
+      line-height: 1;
+      color: rgba(217, 130, 112, 0.065);
+      pointer-events: none;
+    }
+
+    .hero-content,
+    .hero-visual { position: relative; z-index: 1; }
+
+    .eyebrow,
+    .section-tag,
+    .flow-tag,
+    .pill,
+    .type {
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.92);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.78);
+      color: var(--accent-deep);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .eyebrow::before { content: "✦"; color: var(--accent); }
+
+    h1 {
+      max-width: 980px;
+      margin: 24px 0 22px;
+      font-size: clamp(50px, 8vw, 118px);
+      line-height: 0.98;
+      letter-spacing: -0.065em;
+      word-break: keep-all;
+    }
+
+    .hero-lead {
+      max-width: 900px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(19px, 1.45vw, 24px);
+      line-height: 1.85;
+    }
+
+    .highlight {
+      display: inline;
+      padding: 0.05em 0.24em;
+      border-radius: 8px;
+      background: linear-gradient(transparent 54%, rgba(217, 130, 112, 0.20) 54%);
+      font-weight: 950;
+      color: var(--ink);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 50px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 950;
+      transition: 0.22s ease;
+    }
+
+    .btn-primary {
+      color: #fffaf2;
+      background: linear-gradient(135deg, #2f2924, #4a3d34);
+      box-shadow: 0 18px 36px rgba(217, 130, 112, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--accent-deep);
+      background: rgba(255, 253, 248,0.74);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .hero-visual { display: grid; gap: 16px; }
+
+    .visual-card,
+    .mini,
+    .card,
+    .flow-card,
+    .compare-row,
+    .step,
+    .prompt-card,
+    .table-card,
+    .example-card,
+    .check-panel,
+    .demo-card {
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .visual-card:hover,
+    .mini:hover,
+    .card:hover,
+    .flow-card:hover,
+    .compare-row:hover,
+    .step:hover,
+    .prompt-card:hover,
+    .table-card:hover,
+    .example-card:hover,
+    .check-panel:hover,
+    .demo-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 181, 159, 0.98);
+      box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+    }
+
+    .visual-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.78);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .visual-card.large {
+      min-height: 300px;
+      display: grid;
+      align-content: space-between;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(217,130,112,0.14), transparent 32%),
+        radial-gradient(circle at 84% 18%, rgba(125,168,150,0.14), transparent 32%),
+        linear-gradient(135deg, rgba(255, 253, 248,0.9), rgba(255, 248, 238,0.9));
+    }
+
+    .visual-kicker {
+      color: var(--accent-deep);
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    .visual-title {
+      margin: 12px 0 10px;
+      font-size: clamp(30px, 3vw, 52px);
+      line-height: 1.06;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      word-break: keep-all;
+    }
+
+    .visual-card p { margin: 0; color: var(--muted); }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .mini {
+      min-height: 130px;
+      padding: 17px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.82);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .mini b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .mini span { color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+
+    .section { padding: clamp(62px, 7vw, 108px) 0 0; }
+
+    .section-shell {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(30px, 4vw, 58px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at 6% 0%, rgba(217,130,112,0.06), transparent 28%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.97), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent), var(--violet), var(--cyan), transparent 82%);
+      opacity: 0.72;
+    }
+
+    .section-head {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(320px, 0.48fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: clamp(26px, 3.3vw, 52px);
+    }
+
+    .section-tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.86);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      border: 1px solid rgba(201, 181, 159, 0.86);
+    }
+
+    .section h2 {
+      max-width: 1120px;
+      margin: 14px 0 0;
+      font-size: clamp(34px, 5vw, 76px);
+      line-height: 1.04;
+      letter-spacing: -0.062em;
+      word-break: keep-all;
+    }
+
+    .section-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 1.35vw, 21px);
+      line-height: 1.85;
+    }
+
+    .cards-2,
+    .cards-3,
+    .cards-4,
+    .cards-5 {
+      display: grid;
+      gap: 18px;
+    }
+
+    .cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cards-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .cards-4 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .cards-5 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 24px;
+      width: 6px;
+      height: 40px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--accent), rgba(125, 168, 150, 0.72));
+    }
+
+    .card h3 {
+      margin: 0 0 11px;
+      padding-left: 18px;
+      font-size: clamp(20px, 1.55vw, 28px);
+      line-height: 1.22;
+      letter-spacing: -0.035em;
+      word-break: keep-all;
+    }
+
+    .card p { margin: 0; color: var(--muted); }
+
+    .card ul,
+    .clean-list {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .card li,
+    .clean-list li {
+      margin: 0;
+      padding: 9px 12px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 13px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.55;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border: 1px solid rgba(201, 181, 159, 0.88);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.82);
+      color: var(--accent-deep);
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 4px 12px rgba(73, 50, 28, 0.035);
+    }
+
+    .flow-board { display: grid; gap: 18px; }
+
+    .flow-card,
+    .prompt-card,
+    .table-card,
+    .example-card,
+    .check-panel,
+    .demo-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .flow-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .flow-title h3,
+    .prompt-card h3,
+    .table-card h3,
+    .example-card h3,
+    .check-panel h3,
+    .demo-card h3 {
+      margin: 0;
+      font-size: clamp(24px, 2vw, 34px);
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .flow-tag {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.86);
+      color: var(--accent-deep);
+      border: 1px solid rgba(201, 181, 159, 0.78);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 106px;
+      padding: 14px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.64);
+    }
+
+    .flow-step b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 15px;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+
+    .flow-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .definition-card {
+      min-height: 330px;
+      display: grid;
+      align-content: space-between;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(217, 130, 112, 0.12), transparent 28%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.97), rgba(255, 248, 238,0.92));
+    }
+
+    .definition-card h3 {
+      max-width: 760px;
+      margin-bottom: 14px;
+      padding-left: 0;
+      font-size: clamp(28px, 3vw, 52px);
+      letter-spacing: -0.055em;
+    }
+
+    .definition-card::before { display: none; }
+
+    .formula {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .formula-item {
+      padding: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.82);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.70);
+    }
+
+    .formula-item b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent-deep);
+      font-size: 18px;
+    }
+
+    .formula-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .structure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .structure-item {
+      min-height: 260px;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.84);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .structure-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      color: var(--accent-deep);
+      background: var(--accent-soft);
+      border: 1px solid rgba(201, 181, 159, 0.78);
+      font-weight: 950;
+    }
+
+    .structure-item:nth-child(2) .structure-icon { color: #a85b4d; background: var(--violet-soft); }
+    .structure-item:nth-child(3) .structure-icon { color: #427c68; background: var(--cyan-soft); }
+    .structure-item:nth-child(4) .structure-icon { color: #427c68; background: var(--green-soft); }
+
+    .structure-item h3 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1.22;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .structure-item p { margin: 0; color: var(--muted); }
+
+    .compare-list { display: grid; gap: 14px; }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+      padding: 18px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.86);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .compare-side {
+      padding: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.64);
+    }
+
+    .compare-side b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: clamp(17px, 1.25vw, 20px);
+      word-break: keep-all;
+    }
+
+    .compare-side span { color: var(--muted); }
+
+    .vs {
+      display: grid;
+      place-items: center;
+      color: var(--accent-deep);
+      font-weight: 950;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .check-panel {
+      min-height: 310px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .check-panel::after {
+      content: attr(data-num);
+      position: absolute;
+      right: 18px;
+      bottom: -18px;
+      color: rgba(217, 130, 112, 0.08);
+      font-size: 82px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .check-panel h3 { margin-bottom: 12px; }
+    .check-panel p { margin: 0 0 12px; color: var(--muted); }
+
+
+
+    .review-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .review-detail {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .review-detail:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 181, 159, 0.98);
+      box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+    }
+
+    .review-detail .detail-label {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.88);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .review-detail h3 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .review-detail p { margin: 0 0 12px; color: var(--muted); }
+
+    .review-detail ul {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .review-detail li {
+      padding: 10px 12px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.62;
+    }
+
+    .demo-grid,
+    .task-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .demo-card h3,
+    .prompt-card h3,
+    .table-card h3,
+    .example-card h3 { margin-bottom: 14px; }
+
+    .mock-phone {
+      max-width: 390px;
+      min-height: 600px;
+      margin: 0 auto;
+      padding: 18px;
+      border: 1px solid rgba(201, 181, 159, 0.94);
+      border-radius: 34px;
+      background: linear-gradient(180deg, #fffdf8, #fff7ed);
+      box-shadow: inset 0 0 0 8px rgba(47, 41, 36, 0.02), var(--shadow-soft);
+    }
+
+    .phone-bar {
+      width: 90px;
+      height: 5px;
+      margin: 2px auto 18px;
+      border-radius: 999px;
+      background: #c9b59f;
+    }
+
+    .ui-block {
+      margin-bottom: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(223, 208, 189, 0.9);
+      background: rgba(255, 253, 248,0.82);
+      overflow: hidden;
+    }
+
+    .ui-hero {
+      min-height: 138px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(217,130,112,0.25), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(125,168,150,0.22), transparent 28%),
+        linear-gradient(135deg, #f3ddd4, #e7f0ea);
+    }
+
+    .ui-hero strong { display: block; font-size: 24px; line-height: 1.12; letter-spacing: -0.04em; }
+    .ui-hero span { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .ui-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+    .ui-chip { min-height: 54px; border-radius: 14px; background: var(--accent-soft); border: 1px solid rgba(201, 181, 159, 0.7); }
+    .ui-list { display: grid; gap: 8px; padding: 10px; }
+    .ui-line { height: 14px; border-radius: 999px; background: #fbf1d7; }
+    .ui-line.short { width: 64%; }
+    .ui-button { height: 44px; margin: 10px; border-radius: 999px; background: linear-gradient(135deg, #d98270, #7da896); }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(201, 181, 159, 0.86);
+      background: rgba(243, 221, 212, 0.74);
+      color: #51483f;
+    }
+
+    .callout strong { color: var(--accent-deep); }
+
+    .prompt-box { display: grid; gap: 10px; }
+
+    .prompt-mini {
+      padding: 13px 15px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.72;
+    }
+
+    .prompt-mini strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+      word-break: keep-all;
+    }
+
+    .compare-table { display: grid; gap: 10px; }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 0.72fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .table-row > div {
+      padding: 12px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+    }
+
+    .table-row.header > div {
+      color: var(--accent-deep);
+      font-weight: 950;
+      background: rgba(243, 221, 212, 0.86);
+    }
+
+
+    .final-cta {
+      margin-top: clamp(62px, 7vw, 108px);
+      padding: clamp(42px, 6vw, 82px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(217,130,112,0.13), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(125,168,150,0.10), transparent 32%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.96), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .final-cta h2 {
+      max-width: 1120px;
+      margin: 0 auto 16px;
+      font-size: clamp(34px, 5.4vw, 82px);
+      line-height: 1.03;
+      letter-spacing: -0.065em;
+      word-break: keep-all;
+    }
+
+    .final-cta p {
+      max-width: 900px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: clamp(17px, 1.45vw, 22px);
+      line-height: 1.85;
+    }
+
+    @media (min-width: 1800px) {
+      :root { --max: 1760px; }
+      .page { width: min(var(--max), calc(100% - 72px)); }
+    }
+
+    @media (max-width: 1400px) {
+      .check-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .table-row { grid-template-columns: 0.72fr 1fr 1fr; }
+      .table-row > div:nth-child(4) { grid-column: 2 / -1; }
+      .table-row.header > div:nth-child(4) { grid-column: auto; }
+      .table-row.header { grid-template-columns: 0.72fr 1fr 1fr 1fr; }
+    }
+
+    @media (max-width: 1280px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-visual { max-width: 960px; }
+      .overview-grid,
+      .demo-grid,
+      .task-grid { grid-template-columns: 1fr; }
+      .formula { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .page { width: min(100% - 28px, var(--max)); padding-top: 14px; }
+      .topbar { position: relative; top: 0; align-items: flex-start; flex-direction: column; padding: 16px 18px; border-radius: 28px; }
+      .nav { justify-content: flex-start; }
+      .nav a { padding: 7px 10px; }
+      .hero { padding: 34px 22px; }
+      h1 { font-size: clamp(44px, 16vw, 78px); }
+      .visual-title { white-space: normal; font-size: clamp(30px, 8.8vw, 48px); }
+      .section-head,
+      .cards-2,
+      .cards-3,
+      .cards-4,
+      .cards-5,
+      .mini-grid,
+      .check-grid,
+      .formula { grid-template-columns: 1fr; }
+      .section-shell { padding: 22px; }
+      .compare-row { grid-template-columns: 1fr; }
+      .vs { min-height: 30px; }
+      .table-row,
+      .table-row.header { grid-template-columns: 1fr; }
+      .table-row > div:nth-child(4),
+      .table-row.header > div:nth-child(4) { grid-column: auto; }
+      .flow-step b,
+      .mini b,
+      .pill,
+      .flow-tag,
+      .section-tag,
+      .eyebrow { white-space: normal; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      body::before, .topbar { display: none; }
+      .page { width: 100%; padding: 0; }
+      .hero,
+      .section-shell,
+      .final-cta { box-shadow: none; break-inside: avoid; }
+      .section { padding-top: 28px; }
+    }
+
+    .chip-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(201, 181, 159, 0.88);
+      background: rgba(255, 253, 248,0.76);
+      color: #a85b4d;
+      font-weight: 850;
+      box-shadow: var(--shadow-tiny);
+      white-space: nowrap;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .term-card {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 253, 248,0.92), rgba(255, 248, 238,0.88));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .term-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      height: 42px;
+      margin-bottom: 12px;
+      padding: 0 12px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      font-weight: 950;
+      letter-spacing: 0.04em;
+    }
+
+    .term-card h3 {
+      margin: 0 0 4px;
+      font-size: clamp(21px, 1.7vw, 28px);
+      line-height: 1.2;
+      letter-spacing: -0.035em;
+    }
+
+    .term-en {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .tool-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 253, 248,0.94), rgba(255, 248, 238,0.9));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .tool-card h3 {
+      margin: 0 0 12px;
+      font-size: clamp(24px, 2vw, 34px);
+      letter-spacing: -0.04em;
+    }
+
+    .tool-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tool-item {
+      min-height: 76px;
+      padding: 12px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.45;
+    }
+
+    .tool-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+      word-break: keep-all;
+    }
+
+    .process-chain {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+      counter-reset: process;
+    }
+
+    .process-item {
+      position: relative;
+      min-height: 82px;
+      padding: 14px 14px 14px 48px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.68);
+      color: #51483f;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .process-item::before {
+      counter-increment: process;
+      content: counter(process, decimal-leading-zero);
+      position: absolute;
+      left: 12px;
+      top: 14px;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .ability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ability-item {
+      min-height: 72px;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.86);
+      background: rgba(255, 253, 248,0.72);
+      color: #a85b4d;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .tool-grid { grid-template-columns: 1fr; }
+      .chip { white-space: normal; }
+    }
+
+    /* 最终统一字体规则：以 48px 为一级标题基准 */
+    *,*::before,*::after{font-size:inherit !important;line-height:inherit !important}
+    body{font-size:16px !important;line-height:1.6 !important}
+    h1{font-size:64px !important;line-height:1.12 !important}
+    h2{font-size:40px !important;line-height:1.2 !important}
+    h3{font-size:28px !important;line-height:1.25 !important}
+    h4{font-size:22px !important;line-height:1.3 !important}
+    h5,h6{font-size:20px !important;line-height:1.35 !important}
+    p,li,td,th,label,button,input,textarea,select{font-size:16px !important;line-height:1.6 !important}
+    small,.caption,.eyebrow,.section-tag,.card-kicker,.visual-kicker,.flow-tag,.pill,.nav a{font-size:14px !important;line-height:1.45 !important}
+    @media (max-width:620px){h1{font-size:40px !important}h2{font-size:30px !important}h3{font-size:22px !important}h4{font-size:18px !important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand"><span>UI Design Fundamentals</span></div>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#concept">UI 概念</a>
+        <a href="#elements">界面组成</a>
+        <a href="#tools">工具与能力</a>
+        <a href="#process">设计流程</a>
+        <a href="#ai-check">AI 图评估</a>
+        <a href="#checklist">评价标准</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-content">
+        <div class="eyebrow">基础理论</div>
+        <h1>UI 设计结构理论</h1>
+        <p class="hero-lead">
+          UI 不是一张漂亮图片，而是用户与产品发生关系的界面层。判断一张界面是否可用，要同时看
+          <span class="highlight">信息、视觉、组件、交互、反馈、流程与落地性</span>。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#concept">查看 UI 概念</a>
+          <a class="btn btn-secondary" href="#ai-check">进入 AI 图评估</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="visual-card large">
+          <div>
+            <div class="visual-kicker">FROM GOOD-LOOKING TO USABLE</div>
+            <div class="visual-title">好看不等于可用</div>
+            <p>真正的 UI 要让用户看懂信息、完成操作、获得反馈，并且能被开发实现和持续维护。</p>
+          </div>
+          <div class="pills">
+            <span class="pill">信息清晰</span>
+            <span class="pill">视觉层级</span>
+            <span class="pill">组件规范</span>
+            <span class="pill">交互完整</span>
+            <span class="pill">可落地性</span>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini"><b>核心认知</b><span>UI 是用户与产品<br>交互的界面系统。</span></div>
+          <div class="mini"><b>判断对象</b><span>文字、图片、按钮、<br>状态、流程与反馈。</span></div>
+          <div class="mini"><b>专业语言</b><span>从“好不好看”转向<br>“哪里影响使用”。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" id="concept">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">01 / UI DESIGN CONCEPT</span>
+              <h2>UI 设计概念：连接用户、产品功能与视觉表达。</h2>
+            </div>
+            <p class="section-desc">UI 是 User Interface 的缩写，即用户界面。它不是单纯的视觉装饰，而是把产品内容、功能路径、操作反馈和品牌感组织成用户可以理解、可以操作的界面。</p>
+          </div>
+
+          <div class="overview-grid">
+            <div class="card definition-card">
+              <div>
+                <h3>UI = 信息 + 操作 + 反馈 + 品牌感</h3>
+                <p>一个可用界面要先让用户知道“这是什么、我能做什么、下一步在哪里、操作后发生了什么”。视觉风格可以吸引注意力，但清晰的信息结构和稳定的交互反馈才是 UI 的基础。</p>
+              </div>
+              <div class="formula">
+                <div class="formula-item"><b>信息</b><span>标题、正文、图片、价格、说明、规则。</span></div>
+                <div class="formula-item"><b>操作</b><span>按钮、入口、导航、表单、搜索、筛选。</span></div>
+                <div class="formula-item"><b>反馈</b><span>点击、加载、成功、错误、空状态、禁用。</span></div>
+                <div class="formula-item"><b>品牌</b><span>颜色、字体、图形、语气、插画和氛围。</span></div>
+              </div>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-title">
+                <h3>从图片到界面的判断</h3>
+                <span class="flow-tag">可用性优先</span>
+              </div>
+              <div class="flow-steps">
+                <div class="flow-step"><b>看懂内容</b><span>用户能否快速理解页面主题、核心信息和当前状态。</span></div>
+                <div class="flow-step"><b>找到操作</b><span>入口、按钮和下一步动作是否明确，不需要猜测。</span></div>
+                <div class="flow-step"><b>获得反馈</b><span>操作前后是否有清楚的状态变化和结果说明。</span></div>
+                <div class="flow-step"><b>形成系统</b><span>同类组件、间距、圆角、颜色和文字规则是否统一。</span></div>
+                <div class="flow-step"><b>能够落地</b><span>布局、素材、组件和状态是否能被拆分、标注和开发。</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cards-3" style="margin-top:18px;">
+            <div class="card">
+              <h3>UI 不是单张海报</h3>
+              <ul>
+                <li>海报强调视觉吸引，UI 更强调任务完成。</li>
+                <li>UI 需要按钮、状态、反馈、路径和规则。</li>
+                <li>越复杂的产品，越需要稳定的界面系统。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>UI 不是功能堆叠</h3>
+              <ul>
+                <li>功能很多不等于体验好。</li>
+                <li>信息需要分组、排序、隐藏和突出。</li>
+                <li>界面要帮助用户少思考、少犯错、快完成。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>UI 不是只靠审美</h3>
+              <ul>
+                <li>审美解决吸引力，结构解决理解效率。</li>
+                <li>规范解决一致性，交互解决使用路径。</li>
+                <li>落地性决定设计能否进入真实产品。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="elements">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">02 / UI ELEMENTS & TERMS</span>
+              <h2>用户界面包含什么：元素、语言、类型名称。</h2>
+            </div>
+            <p class="section-desc">界面由视觉元素、内容元素、交互元素和状态元素共同组成。掌握这些名称，才能把“感觉不对”拆成具体问题。</p>
+          </div>
+
+          <div class="card">
+            <h3>用户界面包含</h3>
+            <p>这些元素不是孤立存在的，它们共同决定界面的信息表达、视觉风格和操作体验。</p>
+            <div class="chip-cloud">
+              <span class="chip">插图</span>
+              <span class="chip">动画</span>
+              <span class="chip">排版</span>
+              <span class="chip">文本</span>
+              <span class="chip">图片</span>
+              <span class="chip">图标</span>
+              <span class="chip">Banner</span>
+              <span class="chip">字体设计</span>
+              <span class="chip">视觉</span>
+              <span class="chip">配色</span>
+              <span class="chip">版式</span>
+              <span class="chip">交互</span>
+              <span class="chip">按钮</span>
+              <span class="chip">表单</span>
+              <span class="chip">导航</span>
+              <span class="chip">卡片</span>
+              <span class="chip">标签</span>
+              <span class="chip">状态</span>
+              <span class="chip">反馈</span>
+              <span class="chip">加载</span>
+              <span class="chip">错误提示</span>
+              <span class="chip">空状态</span>
+            </div>
+          </div>
+
+          <div class="term-grid">
+            <div class="term-card"><span class="term-code">GUI</span><h3>图形用户界面</h3><span class="term-en">Graphical User Interface</span><p>用图形、窗口、图标、按钮和菜单完成交互的界面形式。</p></div>
+            <div class="term-card"><span class="term-code">UI</span><h3>用户界面</h3><span class="term-en">User Interface</span><p>用户接触产品、理解信息并进行操作的界面层。</p></div>
+            <div class="term-card"><span class="term-code">UE / UX</span><h3>用户体验</h3><span class="term-en">User Experience</span><p>用户在使用产品前、中、后形成的整体感受和效率。</p></div>
+            <div class="term-card"><span class="term-code">HMI</span><h3>人机界面 / 人机交互</h3><span class="term-en">Human Machine Interface / Human Machine Interaction</span><p>人与机器、设备、系统之间的信息输入、显示和控制关系。</p></div>
+            <div class="term-card"><span class="term-code">HUD</span><h3>抬头显示</h3><span class="term-en">Head Up Display</span><p>将关键信息投射在用户视线前方，常见于车机、游戏和航空场景。</p></div>
+            <div class="term-card"><span class="term-code">IXD</span><h3>交互设计</h3><span class="term-en">Interaction Design</span><p>关注用户动作、流程、反馈、状态和系统响应。</p></div>
+            <div class="term-card"><span class="term-code">UED</span><h3>用户体验设计</h3><span class="term-en">User Experience Design</span><p>综合研究、交互、视觉、内容、数据和产品目标的设计过程。</p></div>
+            <div class="term-card"><span class="term-code">ID</span><h3>工业设计</h3><span class="term-en">Industry Design</span><p>关注实体产品的形态、结构、材料、工艺和使用体验。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tools">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">03 / DESIGN TOOLS & ABILITY GAP</span>
+              <h2>设计工具与能力短板：先判断问题根源，再选择训练方向。</h2>
+            </div>
+            <p class="section-desc">软件只是工具，设计能力来自图形、理论、规范、方向判断、审美控制和落地经验。缺哪一层，就补哪一层。</p>
+          </div>
+
+          <div class="tool-grid">
+            <div class="tool-card">
+              <h3>交互动效工具</h3>
+              <p>用于原型、动效、微交互、过渡动画和可操作 Demo。</p>
+              <div class="tool-list">
+                <div class="tool-item"><strong>Axure</strong>流程原型、复杂交互、后台产品原型。</div>
+                <div class="tool-item"><strong>Adobe After Effects</strong>动效设计与视频动画，Mac / Win。</div>
+                <div class="tool-item"><strong>Principle</strong>移动端交互动效，Mac。</div>
+                <div class="tool-item"><strong>ProtoPie</strong>高保真交互原型，Mac / Win。</div>
+                <div class="tool-item"><strong>Flinto</strong>转场与移动端动效，Mac。</div>
+                <div class="tool-item"><strong>Origami</strong>复杂交互原型与动效实验。</div>
+                <div class="tool-item"><strong>Hype</strong>网页动画与 HTML5 动效，Mac / Win。</div>
+                <div class="tool-item"><strong>LottieLab</strong>Lottie 动画编辑与导出。</div>
+                <div class="tool-item"><strong>Rive / Fable</strong>交互动画、状态动画和动态图形。</div>
+              </div>
+            </div>
+
+            <div class="tool-card">
+              <h3>UI 界面视觉工具</h3>
+              <p>用于界面设计、视觉稿、组件库、图像处理、矢量图形和三维视觉。</p>
+              <div class="tool-list">
+                <div class="tool-item"><strong>UXPin</strong>产品原型、设计系统和协作。</div>
+                <div class="tool-item"><strong>Photoshop</strong>图片处理、合成、视觉素材。</div>
+                <div class="tool-item"><strong>Illustrator</strong>矢量图形、图标、插画。</div>
+                <div class="tool-item"><strong>Sketch</strong>Mac 端界面设计与组件。</div>
+                <div class="tool-item"><strong>Figma</strong>界面设计、组件库、团队协作。</div>
+                <div class="tool-item"><strong>Adobe XD</strong>界面设计与原型。</div>
+                <div class="tool-item"><strong>Blender</strong>三维建模、渲染和视觉资产。</div>
+                <div class="tool-item"><strong>Spline</strong>轻量 3D 场景和网页三维。</div>
+                <div class="tool-item"><strong>C4D</strong>三维视觉、动效和商业海报资产。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-card" style="margin-top:18px;">
+            <div class="flow-title">
+              <h3>细化你缺乏的能力根源是什么</h3>
+              <span class="flow-tag">定位短板</span>
+            </div>
+            <p>不要只说“我不会设计”。具体问题可能来自软件操作，也可能来自图形基础、设计理论、规范意识、时间管理、方向判断、插画能力或色彩控制。</p>
+            <div class="ability-grid">
+              <div class="ability-item">软件</div>
+              <div class="ability-item">图形</div>
+              <div class="ability-item">理论</div>
+              <div class="ability-item">规范</div>
+              <div class="ability-item">时间</div>
+              <div class="ability-item">方向</div>
+              <div class="ability-item">插画</div>
+              <div class="ability-item">色彩</div>
+              <div class="ability-item">组件</div>
+              <div class="ability-item">交互</div>
+              <div class="ability-item">审美</div>
+              <div class="ability-item">落地</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="process">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">PROCESS / UI DESIGN FLOW</span>
+              <h2>UI 设计流程：从立项、需求、架构到界面落地。</h2>
+            </div>
+            <p class="section-desc">UI 不是从画界面开始。前面有产品目标、行业分析、用户需求、内容结构和业务规则，后面还有开发、数据、测试、版本迭代和运营。</p>
+          </div>
+
+          <div class="card">
+            <h3>UI 设计流程</h3>
+            <div class="process-chain">
+              <div class="process-item">项目立案</div>
+              <div class="process-item">运营战略</div>
+              <div class="process-item">产品目标</div>
+              <div class="process-item">行业分析</div>
+              <div class="process-item">用户需求</div>
+              <div class="process-item">功能范围</div>
+              <div class="process-item">内容需求</div>
+              <div class="process-item">信息架构</div>
+              <div class="process-item">交互设计</div>
+              <div class="process-item">UI 框架</div>
+              <div class="process-item">界面设计</div>
+              <div class="process-item">信息设计</div>
+              <div class="process-item">情感化设计</div>
+              <div class="process-item">专业技术</div>
+              <div class="process-item">程序开发</div>
+              <div class="process-item">数据服务</div>
+              <div class="process-item">业务流程</div>
+              <div class="process-item">法务</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:18px;">
+            <h3>设计输出流程</h3>
+            <div class="process-chain">
+              <div class="process-item">项目解读</div>
+              <div class="process-item">产品分析</div>
+              <div class="process-item">竞品分析</div>
+              <div class="process-item">市场调研</div>
+              <div class="process-item">用户研究</div>
+              <div class="process-item">交互原型</div>
+              <div class="process-item">界面设计</div>
+              <div class="process-item">设计资源管理</div>
+              <div class="process-item">输出</div>
+              <div class="process-item">测试</div>
+              <div class="process-item">版本迭代</div>
+              <div class="process-item">运营</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="basics">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">BASICS / BASIC DIMENSIONS</span>
+              <h2>UI 基础维度：把抽象审美变成可检查的规则。</h2>
+            </div>
+            <p class="section-desc">一张界面可以从信息层级、布局间距、颜色对比、字体文案、组件状态五个基础维度进行拆解。</p>
+          </div>
+
+          <div class="cards-5">
+            <div class="card">
+              <h3>信息层级</h3>
+              <ul>
+                <li>用户第一眼看到什么？</li>
+                <li>主标题、副标题、正文、按钮是否有顺序？</li>
+                <li>重要信息是否被弱化或隐藏？</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>布局与间距</h3>
+              <ul>
+                <li>模块之间是否有清楚分组？</li>
+                <li>对齐是否统一？</li>
+                <li>卡片内外间距是否稳定？</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>颜色与对比</h3>
+              <ul>
+                <li>主色、辅助色、警示色是否清楚？</li>
+                <li>文字和背景对比是否足够？</li>
+                <li>颜色是否服务信息，而不是只制造氛围？</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>字体与文案</h3>
+              <ul>
+                <li>字号层级是否清楚？</li>
+                <li>字重和行距是否一致？</li>
+                <li>文案是否真实、无错字、可理解？</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>组件与状态</h3>
+              <ul>
+                <li>按钮、输入框、标签、卡片是否统一？</li>
+                <li>是否有默认、点击、禁用、错误、加载状态？</li>
+                <li>组件是否能复用和开发实现？</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="demo-grid" style="margin-top:18px;">
+            <div class="demo-card">
+              <h3>App 截图观察示例</h3>
+              <div class="mock-phone" aria-label="示意 UI 截图">
+                <div class="phone-bar"></div>
+                <div class="ui-block ui-hero">
+                  <strong>今日精选课程</strong>
+                  <span>主标题清楚，副标题辅助说明，行动按钮需要更突出。</span>
+                </div>
+                <div class="ui-block">
+                  <div class="ui-row">
+                    <div class="ui-chip"></div>
+                    <div class="ui-chip"></div>
+                  </div>
+                </div>
+                <div class="ui-block">
+                  <div class="ui-list">
+                    <div class="ui-line"></div>
+                    <div class="ui-line short"></div>
+                    <div class="ui-line"></div>
+                  </div>
+                </div>
+                <div class="ui-button"></div>
+              </div>
+            </div>
+            <div class="example-card">
+              <h3>界面观察路径</h3>
+              <div class="prompt-box">
+                <div class="prompt-mini"><strong>第一步：先看任务</strong>这个页面让用户完成什么？是浏览、购买、登录、填写资料，还是提交订单？</div>
+                <div class="prompt-mini"><strong>第二步：再看重点</strong>用户第一眼能不能看到最重要的信息？页面有没有清晰主次？</div>
+                <div class="prompt-mini"><strong>第三步：看操作路径</strong>按钮在哪里？下一步是什么？用户是否需要猜测？</div>
+                <div class="prompt-mini"><strong>第四步：看状态完整度</strong>空状态、错误状态、加载状态、禁用状态是否考虑到？</div>
+                <div class="prompt-mini"><strong>第五步：看落地性</strong>组件是否统一，尺寸是否稳定，开发是否可以复用和实现？</div>
+              </div>
+              <div class="callout"><strong>判断原则：</strong>不要只问“好不好看”，要追问“哪里影响理解、哪里影响操作、哪里影响落地”。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="ai-check">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">04 / AI UI REVIEW</span>
+              <h2>AI 生成图为什么不能直接用：它常常像 UI，但不一定是产品界面。</h2>
+            </div>
+            <p class="section-desc">AI 图适合做灵感、风格探索和快速预览，但不能直接当成可交付 UI。判断一张 AI UI 图时，要从信息、层级、组件、交互和落地五个维度逐项审稿。</p>
+          </div>
+
+          <div class="check-grid">
+            <div class="check-panel" data-num="01">
+              <h3>信息清晰</h3>
+              <p>标题、说明、入口、价格、状态是否真实清楚。</p>
+              <ul class="clean-list">
+                <li>是否出现无意义文案？</li>
+                <li>是否有错字、乱码、伪英文？</li>
+                <li>用户是否知道页面目标？</li>
+              </ul>
+            </div>
+            <div class="check-panel" data-num="02">
+              <h3>视觉层级</h3>
+              <p>视觉重点是否对应业务重点，而不是所有元素都很抢。</p>
+              <ul class="clean-list">
+                <li>主 CTA 是否突出？</li>
+                <li>重要内容是否被装饰压住？</li>
+                <li>字号、字重、颜色是否有层级？</li>
+              </ul>
+            </div>
+            <div class="check-panel" data-num="03">
+              <h3>组件规范</h3>
+              <p>按钮、卡片、输入框、标签是否统一，是否像一个系统。</p>
+              <ul class="clean-list">
+                <li>同类按钮样式是否一致？</li>
+                <li>圆角、阴影、间距是否统一？</li>
+                <li>是否可以沉淀为组件？</li>
+              </ul>
+            </div>
+            <div class="check-panel" data-num="04">
+              <h3>交互完整</h3>
+              <p>页面不是静态海报，需要考虑用户操作前后发生什么。</p>
+              <ul class="clean-list">
+                <li>点击后去哪里？</li>
+                <li>加载、错误、成功状态在哪里？</li>
+                <li>异常路径是否被处理？</li>
+              </ul>
+            </div>
+            <div class="check-panel" data-num="05">
+              <h3>可落地性</h3>
+              <p>设计是否能被开发实现、适配、维护和复用。</p>
+              <ul class="clean-list">
+                <li>布局是否适合真实屏幕？</li>
+                <li>素材和图层是否可拆分？</li>
+                <li>是否有响应式或边界考虑？</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="review-detail-grid">
+            <div class="review-detail">
+              <span class="detail-label">01 / 信息清晰</span>
+              <h3>先判断页面是否能被读懂</h3>
+              <p>AI 经常生成“看起来像文字”的内容，但真实 UI 需要让用户快速理解页面目标、核心信息和下一步动作。</p>
+              <ul>
+                <li><strong>关键判断：</strong>标题、价格、状态、说明、按钮文案必须真实可读，不能只有装饰感。</li>
+                <li><strong>检查方法：</strong>遮住装饰元素，只看文字和入口，判断用户是否还能理解页面要做什么。</li>
+                <li><strong>修改方向：</strong>重写核心文案，减少无意义英文和假数据，突出页面主目标。</li>
+              </ul>
+            </div>
+
+            <div class="review-detail">
+              <span class="detail-label">02 / 视觉层级</span>
+              <h3>看重点是否真的对应业务重点</h3>
+              <p>很多 AI 图会把背景、图片、标签、按钮都做得很抢，导致用户不知道先看哪里、先点哪里。</p>
+              <ul>
+                <li><strong>关键判断：</strong>视觉焦点应该服务页面任务，主标题、主 CTA 和关键利益点要有明显优先级。</li>
+                <li><strong>检查方法：</strong>眯眼看页面，判断第一眼看到的是核心内容，还是装饰和无关元素。</li>
+                <li><strong>修改方向：</strong>调整字号、字重、颜色对比和留白，让主次关系更清楚。</li>
+              </ul>
+            </div>
+
+            <div class="review-detail">
+              <span class="detail-label">03 / 组件规范</span>
+              <h3>判断它是不是一个统一的系统</h3>
+              <p>真实产品界面需要复用组件。AI 图常见问题是按钮、卡片、标签和输入框各画各的，看起来丰富但无法形成规范。</p>
+              <ul>
+                <li><strong>关键判断：</strong>同类组件要保持一致的尺寸、圆角、阴影、间距、图标位置和文字规则。</li>
+                <li><strong>检查方法：</strong>把所有按钮、卡片、标签单独圈出来，观察它们是否来自同一套组件规则。</li>
+                <li><strong>修改方向：</strong>统一按钮等级、卡片结构和标签样式，沉淀成可复用组件。</li>
+              </ul>
+            </div>
+
+            <div class="review-detail">
+              <span class="detail-label">04 / 交互完整</span>
+              <h3>静态好看不代表可以操作</h3>
+              <p>UI 不是海报。用户点击、输入、等待、失败、成功时，界面都需要提供明确反馈。</p>
+              <ul>
+                <li><strong>关键判断：</strong>除了默认状态，还要考虑加载、禁用、错误、成功、空状态和边界情况。</li>
+                <li><strong>检查方法：</strong>沿着主要操作路径问三件事：点哪里、去哪里、出错怎么办。</li>
+                <li><strong>修改方向：</strong>补齐关键状态和反馈文案，让页面从“静态图”变成“可操作界面”。</li>
+              </ul>
+            </div>
+
+            <div class="review-detail">
+              <span class="detail-label">05 / 可落地性</span>
+              <h3>最后判断它能不能被实现和维护</h3>
+              <p>AI 图可能有复杂光效、混乱图层和不稳定结构。可交付 UI 需要能拆分、适配、标注和开发实现。</p>
+              <ul>
+                <li><strong>关键判断：</strong>布局要适合真实屏幕尺寸，图层和素材要能拆，模块要能响应不同内容长度。</li>
+                <li><strong>检查方法：</strong>把页面拆成模块，判断每个模块是否有固定规则、边界情况和复用价值。</li>
+                <li><strong>修改方向：</strong>简化装饰，稳定网格和间距，补充组件尺寸、状态和响应式规则。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="checklist">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">05 / AI UI CHECKLIST</span>
+              <h2>AI 生成 UI 评价标准：从“像 UI”到“可用界面”。</h2>
+            </div>
+            <p class="section-desc">这份检查清单可用于 AI 图筛选、界面修改、作品点评和方案复盘。</p>
+          </div>
+
+          <div class="task-grid">
+            <div class="prompt-card">
+              <h3>AI UI 检查清单</h3>
+              <div class="prompt-box">
+                <div class="prompt-mini"><strong>步骤 1：选择对象</strong>选择一张 AI 生成的 App 首页、登录页、详情页或活动页。</div>
+                <div class="prompt-mini"><strong>步骤 2：找出问题</strong>从信息清晰、视觉层级、组件规范、交互完整、可落地性五个维度逐项检查问题。</div>
+                <div class="prompt-mini"><strong>步骤 3：写出修改动作</strong>每条问题后面对应一个具体动作，例如“增强主按钮对比”“补充错误状态”。</div>
+                <div class="prompt-mini"><strong>步骤 4：统一语言</strong>把评价词从“好看 / 不好看”改成“层级、对齐、状态、反馈、组件、落地”等专业词。</div>
+              </div>
+            </div>
+
+            <div class="table-card">
+              <h3>AI 生成 UI 评价表</h3>
+              <div class="compare-table">
+                <div class="table-row header">
+                  <div>评价维度</div>
+                  <div>检查问题</div>
+                  <div>常见 AI 问题</div>
+                  <div>修改方向</div>
+                </div>
+                <div class="table-row">
+                  <div>信息清晰</div>
+                  <div>用户是否能快速理解页面目标？</div>
+                  <div>文字错、文案假、重点不清。</div>
+                  <div>重写文案，突出标题与核心信息。</div>
+                </div>
+                <div class="table-row">
+                  <div>视觉层级</div>
+                  <div>主次是否清楚，CTA 是否突出？</div>
+                  <div>元素都很抢，缺少视觉焦点。</div>
+                  <div>调整字号、颜色、间距和对比。</div>
+                </div>
+                <div class="table-row">
+                  <div>组件规范</div>
+                  <div>同类元素是否统一、可复用？</div>
+                  <div>按钮、卡片、标签样式混乱。</div>
+                  <div>建立组件样式和状态规范。</div>
+                </div>
+                <div class="table-row">
+                  <div>交互完整</div>
+                  <div>操作前后是否有反馈？</div>
+                  <div>只有静态图，没有状态和路径。</div>
+                  <div>补充点击、加载、成功、错误状态。</div>
+                </div>
+                <div class="table-row">
+                  <div>可落地性</div>
+                  <div>是否能开发、适配、维护？</div>
+                  <div>图层不可拆、结构不稳定。</div>
+                  <div>拆分模块，统一尺寸，补充标注。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cards-3" style="margin-top:18px;">
+            <div class="card"><h3>核心结论</h3><p>AI 可以快速生成视觉参考，但真正的 UI 设计必须经过审稿、重构和落地验证。</p></div>
+            <div class="card"><h3>适用场景</h3><p>这套检查清单适合用于 AI 图筛选、界面修改、作品点评和设计方案复盘。</p></div>
+            <div class="card"><h3>评价重点</h3><p>用专业语言说清楚问题：从“感觉不对”转化为信息、层级、组件、状态、反馈和落地问题。</p></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="final-cta">
+      <h2>UI 基础理论的价值，是让你能判断 AI 结果，而不是被 AI 结果牵着走。</h2>
+      <p>看起来像 UI 的图片，不一定能成为产品界面。信息、层级、组件、状态、反馈和可落地性，才是判断一张 UI 图是否可用的核心标准。</p>
+    </footer>
+  </div>
+</body>
+</html>
