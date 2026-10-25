@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT 基础入门与 Prompt 结构</title>
+  <style>
+    :root {
+      --bg: #f6efe4;
+      --paper: #fffdf8;
+      --paper-soft: #fff7ed;
+      --ink: #25211d;
+      --muted: #5f574e;
+      --soft: #8b7e72;
+      --line: #dfd0bd;
+      --line-strong: #c9b59f;
+      --accent: #d98270;
+      --accent-deep: #a85b4d;
+      --accent-soft: #f3ddd4;
+      --violet: #d8b76f;
+      --violet-soft: #fbf1d7;
+      --cyan: #7da896;
+      --cyan-soft: #e7f0ea;
+      --green: #7da896;
+      --green-soft: #e7f0ea;
+      --orange: #d8b76f;
+      --orange-soft: #fbf1d7;
+      --rose: #f3ddd4;
+      --rose-soft: #fff7ed;
+      --card: rgba(255, 253, 248, 0.96);
+      --card-soft: rgba(255, 248, 238, 0.9);
+      --shadow: 0 24px 70px rgba(73, 50, 28, 0.09);
+      --shadow-soft: 0 14px 38px rgba(73, 50, 28, 0.065);
+      --shadow-tiny: 0 8px 22px rgba(73, 50, 28, 0.045);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --max: 1680px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%, rgba(217, 130, 112, 0.15), transparent 28%),
+        radial-gradient(circle at 92% 9%, rgba(125, 168, 150, 0.14), transparent 30%),
+        radial-gradient(circle at 46% 42%, rgba(216, 183, 111, 0.08), transparent 34%),
+        linear-gradient(180deg, #fffaf2 0%, var(--bg) 52%, #fffaf2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.78;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.23;
+      background-image:
+        linear-gradient(rgba(210, 196, 178, 0.22) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(210, 196, 178, 0.16) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 82%);
+    }
+
+    a { color: inherit; }
+
+    .page {
+      position: relative;
+      width: min(var(--max), calc(100% - 48px));
+      margin: 0 auto;
+      padding: 24px 0 84px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+      margin: 0 0 28px;
+      padding: 14px 22px;
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.88);
+      box-shadow: 0 14px 34px rgba(73, 50, 28, 0.08);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 950;
+      letter-spacing: -0.035em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(217, 130, 112, 0.24);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255, 253, 248,0.95), transparent 34%),
+        linear-gradient(135deg, #fff7ec, #f3ddd4);
+      color: var(--accent-deep);
+      box-shadow: inset 0 -8px 16px rgba(217, 130, 112, 0.08);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .nav a {
+      padding: 8px 13px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      transition: 0.22s ease;
+    }
+
+    .nav a:hover {
+      color: var(--accent-deep);
+      background: rgba(243, 221, 212, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 660px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(420px, 0.97fr);
+      align-items: center;
+      gap: clamp(28px, 5vw, 86px);
+      padding: clamp(42px, 6vw, 92px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at 15% 12%, rgba(217,130,112,0.13), transparent 34%),
+        radial-gradient(circle at 86% 16%, rgba(125,168,150,0.11), transparent 34%),
+        linear-gradient(135deg, rgba(255, 253, 248,0.96), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "06";
+      position: absolute;
+      right: clamp(8px, 4vw, 64px);
+      bottom: -42px;
+      font-size: clamp(120px, 17vw, 280px);
+      font-weight: 950;
+      letter-spacing: -0.075em;
+      line-height: 1;
+      color: rgba(217, 130, 112, 0.065);
+      pointer-events: none;
+    }
+
+    .hero-content,
+    .hero-visual { position: relative; z-index: 1; }
+
+    .eyebrow,
+    .section-tag,
+    .flow-tag,
+    .pill,
+    .type {
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.92);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.78);
+      color: var(--accent-deep);
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .eyebrow::before { content: "✦"; color: var(--accent); }
+
+    h1 {
+      max-width: 980px;
+      margin: 24px 0 22px;
+      font-size: clamp(50px, 8vw, 118px);
+      line-height: 0.98;
+      letter-spacing: -0.065em;
+      word-break: keep-all;
+    }
+
+    .hero-lead {
+      max-width: 900px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(19px, 1.45vw, 24px);
+      line-height: 1.85;
+    }
+
+    .highlight {
+      display: inline;
+      padding: 0.05em 0.24em;
+      border-radius: 8px;
+      background: linear-gradient(transparent 54%, rgba(217, 130, 112, 0.20) 54%);
+      font-weight: 950;
+      color: var(--ink);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 50px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 950;
+      transition: 0.22s ease;
+    }
+
+    .btn-primary {
+      color: #fffaf2;
+      background: linear-gradient(135deg, #2f2924, #4a3d34);
+      box-shadow: 0 18px 36px rgba(217, 130, 112, 0.22);
+    }
+
+    .btn-secondary {
+      color: var(--accent-deep);
+      background: rgba(255, 253, 248,0.74);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .hero-visual { display: grid; gap: 16px; }
+
+    .visual-card,
+    .mini,
+    .card,
+    .flow-card,
+    .compare-row,
+    .step,
+    .prompt-card,
+    .table-card,
+    .example-card,
+    .check-panel,
+    .demo-card {
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .visual-card:hover,
+    .mini:hover,
+    .card:hover,
+    .flow-card:hover,
+    .compare-row:hover,
+    .step:hover,
+    .prompt-card:hover,
+    .table-card:hover,
+    .example-card:hover,
+    .check-panel:hover,
+    .demo-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 181, 159, 0.98);
+      box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+    }
+
+    .visual-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.78);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .visual-card.large {
+      min-height: 300px;
+      display: grid;
+      align-content: space-between;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(217,130,112,0.14), transparent 32%),
+        radial-gradient(circle at 84% 18%, rgba(125,168,150,0.14), transparent 32%),
+        linear-gradient(135deg, rgba(255, 253, 248,0.9), rgba(255, 248, 238,0.9));
+    }
+
+    .visual-kicker {
+      color: var(--accent-deep);
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    .visual-title {
+      margin: 12px 0 10px;
+      font-size: clamp(30px, 3vw, 52px);
+      line-height: 1.06;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+      word-break: keep-all;
+    }
+
+    .visual-card p { margin: 0; color: var(--muted); }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .mini {
+      min-height: 130px;
+      padding: 17px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.82);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .mini b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .mini span { color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+
+    .section { padding: clamp(62px, 7vw, 108px) 0 0; }
+
+    .section-shell {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(30px, 4vw, 58px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at 6% 0%, rgba(217,130,112,0.06), transparent 28%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.97), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent), var(--violet), var(--cyan), transparent 82%);
+      opacity: 0.72;
+    }
+
+    .section-head {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(320px, 0.48fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: clamp(26px, 3.3vw, 52px);
+    }
+
+    .section-tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.86);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      border: 1px solid rgba(201, 181, 159, 0.86);
+    }
+
+    .section h2 {
+      max-width: 1120px;
+      margin: 14px 0 0;
+      font-size: clamp(34px, 5vw, 76px);
+      line-height: 1.04;
+      letter-spacing: -0.062em;
+      word-break: keep-all;
+    }
+
+    .section-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 1.35vw, 21px);
+      line-height: 1.85;
+    }
+
+    .cards-2,
+    .cards-3,
+    .cards-4,
+    .cards-5 {
+      display: grid;
+      gap: 18px;
+    }
+
+    .cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cards-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .cards-4 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .cards-5 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 24px;
+      width: 6px;
+      height: 40px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--accent), rgba(125, 168, 150, 0.72));
+    }
+
+    .card h3 {
+      margin: 0 0 11px;
+      padding-left: 18px;
+      font-size: clamp(20px, 1.55vw, 28px);
+      line-height: 1.22;
+      letter-spacing: -0.035em;
+      word-break: keep-all;
+    }
+
+    .card p { margin: 0; color: var(--muted); }
+
+    .card ul,
+    .clean-list {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .card li,
+    .clean-list li {
+      margin: 0;
+      padding: 9px 12px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 13px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.55;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border: 1px solid rgba(201, 181, 159, 0.88);
+      border-radius: 999px;
+      background: rgba(255, 253, 248,0.82);
+      color: var(--accent-deep);
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 4px 12px rgba(73, 50, 28, 0.035);
+    }
+
+    .flow-board { display: grid; gap: 18px; }
+
+    .flow-card,
+    .prompt-card,
+    .table-card,
+    .example-card,
+    .check-panel,
+    .demo-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .flow-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .flow-title h3,
+    .prompt-card h3,
+    .table-card h3,
+    .example-card h3,
+    .check-panel h3,
+    .demo-card h3 {
+      margin: 0;
+      font-size: clamp(24px, 2vw, 34px);
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .flow-tag {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.86);
+      color: var(--accent-deep);
+      border: 1px solid rgba(201, 181, 159, 0.78);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 106px;
+      padding: 14px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.64);
+    }
+
+    .flow-step b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 15px;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+
+    .flow-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .definition-card {
+      min-height: 330px;
+      display: grid;
+      align-content: space-between;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(217, 130, 112, 0.12), transparent 28%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.97), rgba(255, 248, 238,0.92));
+    }
+
+    .definition-card h3 {
+      max-width: 760px;
+      margin-bottom: 14px;
+      padding-left: 0;
+      font-size: clamp(28px, 3vw, 52px);
+      letter-spacing: -0.055em;
+    }
+
+    .definition-card::before { display: none; }
+
+    .formula {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .formula-item {
+      padding: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.82);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.70);
+    }
+
+    .formula-item b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent-deep);
+      font-size: 18px;
+    }
+
+    .formula-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .structure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .structure-item {
+      min-height: 260px;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.84);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .structure-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      color: var(--accent-deep);
+      background: var(--accent-soft);
+      border: 1px solid rgba(201, 181, 159, 0.78);
+      font-weight: 950;
+    }
+
+    .structure-item:nth-child(2) .structure-icon { color: #a85b4d; background: var(--violet-soft); }
+    .structure-item:nth-child(3) .structure-icon { color: #427c68; background: var(--cyan-soft); }
+    .structure-item:nth-child(4) .structure-icon { color: #427c68; background: var(--green-soft); }
+
+    .structure-item h3 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1.22;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .structure-item p { margin: 0; color: var(--muted); }
+
+    .compare-list { display: grid; gap: 14px; }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+      gap: 14px;
+      align-items: stretch;
+      padding: 18px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248,0.86);
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .compare-side {
+      padding: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.64);
+    }
+
+    .compare-side b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: clamp(17px, 1.25vw, 20px);
+      word-break: keep-all;
+    }
+
+    .compare-side span { color: var(--muted); }
+
+    .vs {
+      display: grid;
+      place-items: center;
+      color: var(--accent-deep);
+      font-weight: 950;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .check-panel {
+      min-height: 310px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .check-panel::after {
+      content: attr(data-num);
+      position: absolute;
+      right: 18px;
+      bottom: -18px;
+      color: rgba(217, 130, 112, 0.08);
+      font-size: 82px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .check-panel h3 { margin-bottom: 12px; }
+    .check-panel p { margin: 0 0 12px; color: var(--muted); }
+
+
+
+    .review-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .review-detail {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .review-detail:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 181, 159, 0.98);
+      box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+    }
+
+    .review-detail .detail-label {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(243, 221, 212, 0.88);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .review-detail h3 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 1.8vw, 30px);
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .review-detail p { margin: 0 0 12px; color: var(--muted); }
+
+    .review-detail ul {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .review-detail li {
+      padding: 10px 12px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.62;
+    }
+
+    .demo-grid,
+    .task-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .demo-card h3,
+    .prompt-card h3,
+    .table-card h3,
+    .example-card h3 { margin-bottom: 14px; }
+
+    .mock-phone {
+      max-width: 390px;
+      min-height: 600px;
+      margin: 0 auto;
+      padding: 18px;
+      border: 1px solid rgba(201, 181, 159, 0.94);
+      border-radius: 34px;
+      background: linear-gradient(180deg, #fffdf8, #fff7ed);
+      box-shadow: inset 0 0 0 8px rgba(47, 41, 36, 0.02), var(--shadow-soft);
+    }
+
+    .phone-bar {
+      width: 90px;
+      height: 5px;
+      margin: 2px auto 18px;
+      border-radius: 999px;
+      background: #c9b59f;
+    }
+
+    .ui-block {
+      margin-bottom: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(223, 208, 189, 0.9);
+      background: rgba(255, 253, 248,0.82);
+      overflow: hidden;
+    }
+
+    .ui-hero {
+      min-height: 138px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(217,130,112,0.25), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(125,168,150,0.22), transparent 28%),
+        linear-gradient(135deg, #f3ddd4, #e7f0ea);
+    }
+
+    .ui-hero strong { display: block; font-size: 24px; line-height: 1.12; letter-spacing: -0.04em; }
+    .ui-hero span { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .ui-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+    .ui-chip { min-height: 54px; border-radius: 14px; background: var(--accent-soft); border: 1px solid rgba(201, 181, 159, 0.7); }
+    .ui-list { display: grid; gap: 8px; padding: 10px; }
+    .ui-line { height: 14px; border-radius: 999px; background: #fbf1d7; }
+    .ui-line.short { width: 64%; }
+    .ui-button { height: 44px; margin: 10px; border-radius: 999px; background: linear-gradient(135deg, #d98270, #7da896); }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(201, 181, 159, 0.86);
+      background: rgba(243, 221, 212, 0.74);
+      color: #51483f;
+    }
+
+    .callout strong { color: var(--accent-deep); }
+
+    .prompt-box { display: grid; gap: 10px; }
+
+    .prompt-mini {
+      padding: 13px 15px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.72;
+    }
+
+    .prompt-mini strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+      word-break: keep-all;
+    }
+
+    .compare-table { display: grid; gap: 10px; }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 0.72fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .table-row > div {
+      padding: 12px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+    }
+
+    .table-row.header > div {
+      color: var(--accent-deep);
+      font-weight: 950;
+      background: rgba(243, 221, 212, 0.86);
+    }
+
+
+    .final-cta {
+      margin-top: clamp(62px, 7vw, 108px);
+      padding: clamp(42px, 6vw, 82px);
+      border: 1px solid rgba(223, 208, 189, 0.96);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(217,130,112,0.13), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(125,168,150,0.10), transparent 32%),
+        linear-gradient(180deg, rgba(255, 253, 248,0.96), rgba(255, 248, 238,0.92));
+      box-shadow: var(--shadow-soft);
+    }
+
+    .final-cta h2 {
+      max-width: 1120px;
+      margin: 0 auto 16px;
+      font-size: clamp(34px, 5.4vw, 82px);
+      line-height: 1.03;
+      letter-spacing: -0.065em;
+      word-break: keep-all;
+    }
+
+    .final-cta p {
+      max-width: 900px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: clamp(17px, 1.45vw, 22px);
+      line-height: 1.85;
+    }
+
+    @media (min-width: 1800px) {
+      :root { --max: 1760px; }
+      .page { width: min(var(--max), calc(100% - 72px)); }
+    }
+
+    @media (max-width: 1400px) {
+      .check-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .table-row { grid-template-columns: 0.72fr 1fr 1fr; }
+      .table-row > div:nth-child(4) { grid-column: 2 / -1; }
+      .table-row.header > div:nth-child(4) { grid-column: auto; }
+      .table-row.header { grid-template-columns: 0.72fr 1fr 1fr 1fr; }
+    }
+
+    @media (max-width: 1280px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-visual { max-width: 960px; }
+      .overview-grid,
+      .demo-grid,
+      .task-grid { grid-template-columns: 1fr; }
+      .formula { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      .page { width: min(100% - 28px, var(--max)); padding-top: 14px; }
+      .topbar { position: relative; top: 0; align-items: flex-start; flex-direction: column; padding: 16px 18px; border-radius: 28px; }
+      .nav { justify-content: flex-start; }
+      .nav a { padding: 7px 10px; }
+      .hero { padding: 34px 22px; }
+      h1 { font-size: clamp(44px, 16vw, 78px); }
+      .visual-title { white-space: normal; font-size: clamp(30px, 8.8vw, 48px); }
+      .section-head,
+      .cards-2,
+      .cards-3,
+      .cards-4,
+      .cards-5,
+      .mini-grid,
+      .check-grid,
+      .formula { grid-template-columns: 1fr; }
+      .section-shell { padding: 22px; }
+      .compare-row { grid-template-columns: 1fr; }
+      .vs { min-height: 30px; }
+      .table-row,
+      .table-row.header { grid-template-columns: 1fr; }
+      .table-row > div:nth-child(4),
+      .table-row.header > div:nth-child(4) { grid-column: auto; }
+      .flow-step b,
+      .mini b,
+      .pill,
+      .flow-tag,
+      .section-tag,
+      .eyebrow { white-space: normal; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      body::before, .topbar { display: none; }
+      .page { width: 100%; padding: 0; }
+      .hero,
+      .section-shell,
+      .final-cta { box-shadow: none; break-inside: avoid; }
+      .section { padding-top: 28px; }
+    }
+
+    .chip-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(201, 181, 159, 0.88);
+      background: rgba(255, 253, 248,0.76);
+      color: #a85b4d;
+      font-weight: 850;
+      box-shadow: var(--shadow-tiny);
+      white-space: nowrap;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .term-card {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 253, 248,0.92), rgba(255, 248, 238,0.88));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .term-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      height: 42px;
+      margin-bottom: 12px;
+      padding: 0 12px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      font-weight: 950;
+      letter-spacing: 0.04em;
+    }
+
+    .term-card h3 {
+      margin: 0 0 4px;
+      font-size: clamp(21px, 1.7vw, 28px);
+      line-height: 1.2;
+      letter-spacing: -0.035em;
+    }
+
+    .term-en {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .tool-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 253, 248,0.94), rgba(255, 248, 238,0.9));
+      box-shadow: var(--shadow-tiny);
+    }
+
+    .tool-card h3 {
+      margin: 0 0 12px;
+      font-size: clamp(24px, 2vw, 34px);
+      letter-spacing: -0.04em;
+    }
+
+    .tool-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tool-item {
+      min-height: 76px;
+      padding: 12px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+      line-height: 1.45;
+    }
+
+    .tool-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+      word-break: keep-all;
+    }
+
+    .process-chain {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+      counter-reset: process;
+    }
+
+    .process-item {
+      position: relative;
+      min-height: 82px;
+      padding: 14px 14px 14px 48px;
+      border: 1px solid rgba(223, 208, 189, 0.78);
+      border-radius: 16px;
+      background: rgba(255, 253, 248,0.68);
+      color: #51483f;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .process-item::before {
+      counter-increment: process;
+      content: counter(process, decimal-leading-zero);
+      position: absolute;
+      left: 12px;
+      top: 14px;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .ability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ability-item {
+      min-height: 72px;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(223, 208, 189, 0.86);
+      background: rgba(255, 253, 248,0.72);
+      color: #a85b4d;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .tool-grid { grid-template-columns: 1fr; }
+      .chip { white-space: normal; }
+    }
+
+    /* Lesson 06 additions: keep the same visual language as the provided Lesson 05 HTML. */
+    .nav a.active {
+      color: var(--accent-deep);
+      background: rgba(243, 221, 212, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(201, 181, 159, 0.34);
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .template-card {
+      padding: 24px;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--card), var(--card-soft));
+      box-shadow: var(--shadow-tiny);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .template-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 181, 159, 0.98);
+      box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+    }
+
+    .template-card h3 {
+      margin: 0 0 12px;
+      font-size: clamp(24px, 2vw, 34px);
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+    }
+
+    .template-card p { margin: 0 0 14px; color: var(--muted); }
+
+    .code-block {
+      overflow: hidden;
+      border: 1px solid rgba(223, 208, 189, 0.94);
+      border-radius: var(--radius-lg);
+      background: rgba(47, 41, 36, 0.96);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), var(--shadow-tiny);
+    }
+
+    .code-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 54px;
+      padding: 12px 14px 12px 18px;
+      border-bottom: 1px solid rgba(255, 248, 238, 0.12);
+      color: #fff7ed;
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: 0.04em;
+    }
+
+    .copy-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 248, 238, 0.20);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(255, 248, 238, 0.12);
+      color: #fff7ed;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.22s ease;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(217, 130, 112, 0.34);
+      border-color: rgba(255, 248, 238, 0.34);
+    }
+
+    .code-block pre {
+      margin: 0;
+      max-height: 560px;
+      overflow: auto;
+      padding: 20px;
+      color: #fffaf2;
+      font-size: 14px;
+      line-height: 1.85;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(217,130,112,0.16), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(125,168,150,0.13), transparent 28%);
+    }
+
+    .table-like { display: grid; gap: 10px; }
+
+
+
+    .table-like .table-row {
+      display: grid;
+      grid-template-columns: 0.72fr 1.1fr 1.1fr;
+      gap: 10px;
+    }
+
+    .table-like .table-row > div {
+      padding: 12px 14px;
+      border: 1px solid rgba(223, 208, 189, 0.76);
+      border-radius: 14px;
+      background: rgba(255, 253, 248,0.64);
+      color: #51483f;
+    }
+
+    .table-like .table-row.header > div {
+      color: var(--accent-deep);
+      font-weight: 950;
+      background: rgba(243, 221, 212, 0.86);
+    }
+
+    #checklist .check-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .compare-side.good {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(125, 168, 150, 0.13), transparent 34%),
+        rgba(255, 253, 248, 0.68);
+      border-color: rgba(125, 168, 150, 0.42);
+    }
+
+    .compare-side.bad {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(217, 130, 112, 0.14), transparent 34%),
+        rgba(255, 253, 248, 0.68);
+      border-color: rgba(217, 130, 112, 0.34);
+    }
+
+    @media (max-width: 1280px) {
+      .template-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      .template-grid { grid-template-columns: 1fr; }
+      .code-title { align-items: flex-start; flex-direction: column; }
+      .copy-btn { width: fit-content; }
+      .table-like .table-row, #checklist .check-grid { grid-template-columns: 1fr; }
+    }
+
+    /* 最终统一字体规则：以 48px 为一级标题基准 */
+    *,*::before,*::after{font-size:inherit !important;line-height:inherit !important}
+    body{font-size:16px !important;line-height:1.6 !important}
+    h1{font-size:64px !important;line-height:1.12 !important}
+    h2{font-size:40px !important;line-height:1.2 !important}
+    h3{font-size:28px !important;line-height:1.25 !important}
+    h4{font-size:22px !important;line-height:1.3 !important}
+    h5,h6{font-size:20px !important;line-height:1.35 !important}
+    p,li,td,th,label,button,input,textarea,select{font-size:16px !important;line-height:1.6 !important}
+    small,.caption,.eyebrow,.section-tag,.card-kicker,.visual-kicker,.flow-tag,.pill,.nav a{font-size:14px !important;line-height:1.45 !important}
+    @media (max-width:620px){h1{font-size:40px !important}h2{font-size:30px !important}h3{font-size:22px !important}h4{font-size:18px !important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand"><span>Prompt Ability</span></div>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#position">GPT 定位</a>
+        <a href="#structure">Prompt 结构</a>
+        <a href="#ui-prompt">UI 提示词</a>
+        <a href="#quality">高质量提问</a>
+        <a href="#template">模板</a>
+        <a href="#output-format">输出格式</a>
+        <a href="#reverse-prompt">反推提示</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-content">
+        <div class="eyebrow">Prompt 能力</div>
+        <h1>GPT 基础入门与 Prompt 结构</h1>
+        <p class="hero-lead">
+          掌握面向 UI 设计的 Prompt 基础结构，把“想做一个页面”这类模糊想法，改写成
+          <span class="highlight">有角色、有背景、有任务、有约束、有输出格式</span>的可执行指令。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#structure">查看 Prompt 结构</a>
+          <a class="btn btn-secondary" href="#template">复制可用模板</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="visual-card large">
+          <div>
+            <div class="visual-kicker">FROM VAGUE IDEA TO EXECUTABLE BRIEF</div>
+            <div class="visual-title">Prompt 不是一句话，而是一份小型设计需求。</div>
+            <p>越清楚地说明身份、场景、目标、边界和交付格式，GPT 越容易输出可判断、可修改、可继续迭代的结果。</p>
+          </div>
+          <div class="pills">
+            <span class="pill">GPT</span>
+            <span class="pill">Prompt</span>
+            <span class="pill">角色</span>
+            <span class="pill">背景</span>
+            <span class="pill">任务</span>
+            <span class="pill">约束</span>
+            <span class="pill">输出</span>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini"><b>核心认知</b><span>Prompt 是给 AI 的<br>清晰任务说明。</span></div>
+          <div class="mini"><b>设计用途</b><span>生成信息架构、竞品分析、<br>微文案和设计说明。</span></div>
+          <div class="mini"><b>判断原则</b><span>AI 输出需要审稿，<br>不是最终答案。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" id="position">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">01 / GPT IN UI DESIGN</span>
+              <h2>GPT 在 UI 设计中的定位：辅助思考、整理信息、加速表达。</h2>
+            </div>
+            <p class="section-desc">GPT 可以帮助你把零散想法变成结构化内容，但它不会自动理解真实业务、品牌调性和用户场景。设计判断仍然需要由人来完成。</p>
+          </div>
+
+          <div class="overview-grid">
+            <div class="card definition-card">
+              <div>
+                <h3>GPT = 逻辑中枢 + 文案助手 + Prompt 教练</h3>
+                <p>在 UI 设计流程中，它适合做需求梳理、页面结构、内容生成、设计说明和方案对比。它能提高表达效率，但不能代替设计师对用户、业务和视觉质量的判断。</p>
+              </div>
+              <div class="formula">
+                <div class="formula-item"><b>梳理</b><span>把需求拆成模块、层级和页面结构。</span></div>
+                <div class="formula-item"><b>生成</b><span>输出 IA、竞品分析、微文案、说明文。</span></div>
+                <div class="formula-item"><b>对比</b><span>给出方案差异、优缺点和修改方向。</span></div>
+                <div class="formula-item"><b>追问</b><span>提示缺失信息，帮助补全需求边界。</span></div>
+                <div class="formula-item"><b>复盘</b><span>总结可复用模板和下一轮优化点。</span></div>
+                <div class="formula-item"><b>审稿</b><span>检查逻辑、格式、遗漏和表达清晰度。</span></div>
+              </div>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-title">
+                <h3>适合让 GPT 做什么</h3>
+                <span class="flow-tag">辅助而非替代</span>
+              </div>
+              <div class="flow-steps">
+                <div class="flow-step"><b>信息架构 IA</b><span>整理页面导航、模块顺序、内容分组和层级关系。</span></div>
+                <div class="flow-step"><b>竞品分析</b><span>按功能、视觉、内容、用户路径拆解竞品差异。</span></div>
+                <div class="flow-step"><b>微文案</b><span>生成按钮、空状态、错误提示、引导语和标题。</span></div>
+                <div class="flow-step"><b>设计说明</b><span>把设计意图、组件逻辑和视觉风格写清楚。</span></div>
+                <div class="flow-step"><b>Prompt 迭代</b><span>根据反馈不断收窄范围，得到更可执行的结果。</span></div>
+              </div>
+              <div class="callout"><strong>使用原则：</strong>把 GPT 当作共创工具。先让它帮你生成方向，再用设计判断筛选、修改和落地。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="structure">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">02 / PROMPT STRUCTURE</span>
+              <h2>高质量 Prompt 的基础结构：先讲清楚，再要求输出。</h2>
+            </div>
+            <p class="section-desc">不要只写“帮我做一个好看的首页”。清楚的 Prompt 要像一份小型设计需求，包含角色、背景、任务、约束、输出格式和参考标准。</p>
+          </div>
+
+          <div class="structure-grid">
+            <div class="structure-item">
+              <div class="structure-icon">01</div>
+              <h3>角色 Role</h3>
+              <p>让 AI 知道以什么身份回答。例如：资深 UI 设计师、产品经理、UX 文案设计师、竞品分析师。</p>
+            </div>
+            <div class="structure-item">
+              <div class="structure-icon">02</div>
+              <h3>背景 Context</h3>
+              <p>说明产品、用户、业务场景和页面目标。例如：AI 学习 App，面向大学生，首页要帮助用户开始今日学习。</p>
+            </div>
+            <div class="structure-item">
+              <div class="structure-icon">03</div>
+              <h3>任务 Task</h3>
+              <p>明确需要生成什么内容。例如：设计首页信息架构、输出模块清单、写 3 组 Banner 文案。</p>
+            </div>
+            <div class="structure-item">
+              <div class="structure-icon">04</div>
+              <h3>约束 Constraint</h3>
+              <p>控制风格、范围、尺寸、组件、语气和不要出现的内容。例如：简洁科技感，不要杂乱背景。</p>
+            </div>
+            <div class="structure-item">
+              <div class="structure-icon">05</div>
+              <h3>输出 Output</h3>
+              <p>规定输出格式。例如：用 Markdown 表格输出，包含模块名称、内容、交互、视觉重点。</p>
+            </div>
+            <div class="structure-item">
+              <div class="structure-icon">06</div>
+              <h3>标准 Standard</h3>
+              <p>说明判断标准和参考方向。例如：信息清晰、组件可落地、视觉层级明确、适合移动端。</p>
+            </div>
+          </div>
+
+          <div class="compare-list" style="margin-top:18px;">
+            <div class="compare-row">
+              <div class="compare-side bad"><b>模糊 Prompt</b><span>帮我做一个 AI 学习 App 首页，要好看一点。</span></div>
+              <div class="vs">→</div>
+              <div class="compare-side good"><b>可执行 Prompt</b><span>你是资深 UI 设计师。请为面向大学生的 AI 学习 App 设计首页信息架构，输出页面模块、内容层级、组件需求、视觉风格和交互状态。风格简洁科技感，不要杂乱背景，用表格输出。</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="ui-prompt">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">03 / UI PROMPT DIMENSIONS</span>
+              <h2>UI 设计 Prompt 必须说清：页面、场景、层级、风格、组件、输出。</h2>
+            </div>
+            <p class="section-desc">UI Prompt 的重点不是“好看”，而是让 AI 明白页面类型、用户正在做什么、哪些信息最重要、界面由哪些组件组成，以及最终要以什么形式交付。</p>
+          </div>
+
+          <div class="cards-3">
+            <div class="card">
+              <h3>页面类型</h3>
+              <ul>
+                <li>首页、详情页、搜索页、登录页、数据看板、支付页。</li>
+                <li>不同页面的目标不同，信息组织方式也不同。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>用户场景</h3>
+              <ul>
+                <li>用户是谁？在什么情况下使用？想完成什么任务？</li>
+                <li>场景越清楚，输出越接近真实产品需求。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>信息层级</h3>
+              <ul>
+                <li>主标题、核心入口、内容模块、辅助说明如何排序？</li>
+                <li>让 AI 先帮你拆结构，再考虑视觉细节。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>视觉风格</h3>
+              <ul>
+                <li>说明关键词：简洁、科技、年轻、轻量、专业、温暖。</li>
+                <li>同时说明不要什么：不要厚重阴影，不要杂乱背景。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>组件要求</h3>
+              <ul>
+                <li>导航、Banner、卡片、按钮、标签、表单、列表、弹窗。</li>
+                <li>必要时补充默认、点击、加载、错误、空状态。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>输出形式</h3>
+              <ul>
+                <li>页面结构、组件清单、表格、文案方案、Prompt 模板。</li>
+                <li>输出格式明确，后续修改和复用更方便。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flow-card" style="margin-top:18px;">
+            <div class="flow-title">
+              <h3>正向要求 + 负向限制</h3>
+              <span class="flow-tag">控制输出边界</span>
+            </div>
+            <div class="compare-list">
+              <div class="compare-row">
+                <div class="compare-side good"><b>正向要求</b><span>简洁科技感、信息清晰、卡片式布局、主 CTA 明确、移动端优先。</span></div>
+                <div class="vs">+</div>
+                <div class="compare-side bad"><b>负向限制</b><span>不要杂乱背景、不要过多装饰、不要伪英文、不要只输出抽象形容词。</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="quality">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">04 / BETTER QUESTIONING</span>
+              <h2>高质量提问方式：用结构化表达减少误解。</h2>
+            </div>
+            <p class="section-desc">提问质量会直接影响输出质量。把需求拆成段落、列表或表格，可以让 GPT 更稳定地理解目标，也更容易得到可执行的回答。</p>
+          </div>
+
+          <div class="cards-3">
+            <div class="card">
+              <h3>用 Markdown 组织需求</h3>
+              <ul>
+                <li>用标题分区：背景 / 任务 / 约束 / 输出。</li>
+                <li>用列表列出页面模块、组件和风格关键词。</li>
+                <li>避免把所有要求塞进一句长句。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>明确输出格式</h3>
+              <ul>
+                <li>可以要求输出表格、页面结构、组件清单、文案方案。</li>
+                <li>也可以要求输出“可直接给设计师使用的 Prompt”。</li>
+                <li>格式越具体，后续修改成本越低。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>通过追问优化</h3>
+              <ul>
+                <li>第一轮先得到结构，第二轮补细节。</li>
+                <li>发现不准确时，指出问题并让它重写。</li>
+                <li>最后总结成可复用模板。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="table-card" style="margin-top:18px;">
+            <h3>从一句话到结构化 Prompt</h3>
+            <div class="table-like">
+              <div class="table-row header"><div>表达方式</div><div>示例</div><div>输出效果</div></div>
+              <div class="table-row"><div>一句话需求</div><div>帮我写一个学习 App 首页 Prompt。</div><div>容易得到泛泛内容，缺少页面细节。</div></div>
+              <div class="table-row"><div>结构化需求</div><div>给出角色、产品背景、用户画像、页面模块、视觉风格和输出格式。</div><div>更容易生成可执行、可检查、可迭代的结果。</div></div>
+              <div class="table-row"><div>带约束需求</div><div>补充“简洁科技感，不要杂乱背景；输出表格和完整 Prompt”。</div><div>输出边界更稳定，减少跑偏和空话。</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="template">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">05 / REUSABLE PROMPT TEMPLATE</span>
+              <h2>可复用 Prompt 模板：把需求写成可替换的结构。</h2>
+            </div>
+            <p class="section-desc">当你经常需要生成 UI 页面、组件清单、文案或设计说明时，可以先沉淀模板，再替换产品名称、用户场景和页面目标。</p>
+          </div>
+
+          <div class="template-grid">
+            <div class="template-card">
+              <h3>通用 UI Prompt 模板</h3>
+              <p>适合首页、详情页、搜索页、活动页、数据看板等 UI 需求。</p>
+              <div class="code-block">
+                <div class="code-title"><span>UI_PROMPT_TEMPLATE.md</span><button class="copy-btn" data-copy="template-general">复制</button></div>
+                <pre id="template-general">你是一个资深 UI/UX 设计师。
+
+【产品背景】
+产品名称：{产品名称}
+产品类型：{App / 网站 / 小程序 / 后台系统}
+目标用户：{用户画像}
+使用场景：{用户在什么情况下使用}
+页面目标：{这个页面要帮助用户完成什么}
+
+【设计任务】
+请为「{页面名称}」设计一套 UI 需求方案，包含：
+1. 页面信息架构
+2. 模块顺序与内容说明
+3. 关键组件清单
+4. 主要交互状态
+5. 视觉风格建议
+6. 页面核心文案
+
+【设计约束】
+风格：{简洁 / 科技 / 温暖 / 专业 / 年轻 / 高端}
+设备：{移动端 / Web / 平板}
+要求：信息层级清晰，主 CTA 明确，组件可复用。
+不要：不要杂乱背景，不要伪英文，不要只给抽象形容词。
+
+【输出格式】
+请用 Markdown 表格输出，字段包括：模块名称、内容说明、组件、交互、视觉重点、优先级。</pre>
+              </div>
+            </div>
+
+            <div class="template-card">
+              <h3>AI 学习 App 首页 Prompt 示例</h3>
+              <p>这是把模板套进具体项目后的完整写法，可以继续替换成其他产品。</p>
+              <div class="code-block">
+                <div class="code-title"><span>AI_LEARNING_APP_HOME.md</span><button class="copy-btn" data-copy="template-app">复制</button></div>
+                <pre id="template-app">你是一个资深 UI/UX 设计师。
+
+请为一个「AI 学习类 App」设计首页 UI 需求方案。
+
+【产品背景】
+产品面向大学生和职场新人，帮助用户通过 AI 生成学习计划、整理知识点、练习题目和复盘进度。
+首页目标是让用户快速看到今日学习任务，并进入 AI 辅助学习流程。
+
+【页面要求】
+1. 补充用户画像与核心使用场景。
+2. 设计首页信息架构，包含顶部问候、今日学习任务、AI 学习入口、课程推荐、学习进度、底部导航。
+3. 给出每个模块的组件需求和内容说明。
+4. 视觉风格为简洁、科技、轻量、年轻化。
+5. 加入正向与负向约束：需要清晰层级和主 CTA，不要杂乱背景、伪英文和过多装饰。
+
+【输出格式】
+请用 Markdown 表格输出：模块名称、用户目的、内容说明、组件需求、交互状态、视觉重点。
+最后总结一段可复用的 UI Prompt 模板。</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="output-format">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">06 / GPT OUTPUT FORMATS</span>
+              <h2>GPT 可输出格式：先决定交付形态，再让内容进入正确容器。</h2>
+            </div>
+            <p class="section-desc">GPT 不只能输出一段文字。你可以要求它用表格、JSON、YAML、HTML、组件清单、设计说明、Prompt 模板等格式交付，让结果更容易复制、修改、导入工具或交给团队协作。</p>
+          </div>
+
+          <div class="cards-3">
+            <div class="card">
+              <h3>结构化阅读格式</h3>
+              <ul>
+                <li><strong>Markdown 表格：</strong>适合页面模块、竞品分析、组件清单。</li>
+                <li><strong>编号列表：</strong>适合流程步骤、设计原则、修改建议。</li>
+                <li><strong>分层大纲：</strong>适合信息架构、课程目录、页面内容层级。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>可机器读取格式</h3>
+              <ul>
+                <li><strong>JSON：</strong>适合配置、组件属性、数据结构、接口示例。</li>
+                <li><strong>YAML：</strong>适合轻量配置、字段说明、模板化内容。</li>
+                <li><strong>CSV：</strong>适合批量文案、标签、表单字段和测试用例。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>可直接交付格式</h3>
+              <ul>
+                <li><strong>HTML / CSS：</strong>适合快速生成页面原型和组件示例。</li>
+                <li><strong>PRD / 设计说明：</strong>适合交给产品、设计和开发同步。</li>
+                <li><strong>Prompt 模板：</strong>适合复用到下一次相似任务。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="template-grid" style="margin-top:18px;">
+            <div class="template-card">
+              <h3>输出格式选择器</h3>
+              <p>同一个需求，换不同输出格式，结果会服务于不同的使用场景。</p>
+              <div class="table-like">
+                <div class="table-row header"><div>目标</div><div>推荐格式</div><div>适合场景</div></div>
+                <div class="table-row"><div>快速看懂页面结构</div><div>Markdown 表格</div><div>模块拆解、页面 IA、组件说明。</div></div>
+                <div class="table-row"><div>给设计师继续深化</div><div>设计 Brief</div><div>页面目标、视觉方向、组件规范、文案语气。</div></div>
+                <div class="table-row"><div>给开发或工具读取</div><div>JSON / YAML</div><div>组件字段、状态配置、页面数据结构。</div></div>
+                <div class="table-row"><div>快速做页面样稿</div><div>HTML / CSS</div><div>低保真页面、落地页、卡片组件、表单布局。</div></div>
+                <div class="table-row"><div>沉淀可复用方法</div><div>Prompt 模板</div><div>把本次经验抽象成可替换变量。</div></div>
+              </div>
+            </div>
+
+            <div class="template-card">
+              <h3>可复制：要求 GPT 按多格式输出</h3>
+              <p>适合在一次回答中同时拿到结构、配置和复用 Prompt。</p>
+              <div class="code-block">
+                <div class="code-title"><span>GPT_OUTPUT_FORMAT_PROMPT.md</span><button class="copy-btn" data-copy="template-output-format">复制</button></div>
+                <pre id="template-output-format">你是一个资深 UI/UX 设计师和产品信息架构顾问。
+
+请基于以下需求，为「{页面名称}」输出 UI 设计方案。
+
+【背景】
+产品：{产品名称}
+用户：{目标用户}
+场景：{使用场景}
+页面目标：{页面要帮助用户完成什么}
+
+【请按以下 4 种格式输出】
+1. Markdown 表格：字段包含「模块名称 / 用户目的 / 内容说明 / 组件需求 / 交互状态 / 视觉重点」。
+2. JSON：把页面模块整理成可读取的数据结构，字段包含 name、goal、components、states、priority。
+3. 设计说明：用 3 段话说明页面逻辑、视觉方向和交互重点。
+4. 可复用 Prompt：把这次需求总结成一个可替换变量的 Prompt 模板。
+
+【约束】
+语言清晰，不要只给抽象形容词；模块要可落地；输出必须有清楚标题和分区。</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="reverse-prompt">
+        <div class="section-shell">
+          <div class="section-head">
+            <div>
+              <span class="section-tag">07 / REVERSE FROM FORMAT</span>
+              <h2>从格式反推提示内容：看到想要的结果，就能倒推出该怎么问。</h2>
+            </div>
+            <p class="section-desc">当你不知道 Prompt 怎么写时，可以先定义“最后想拿到什么格式”。输出字段就是提问线索：每一个表格列名、JSON 字段或设计说明段落，都在提醒你需要补充哪些背景、约束和判断标准。</p>
+          </div>
+
+          <div class="task-grid">
+            <div class="demo-card">
+              <h3>反推方法：先看输出字段</h3>
+              <div class="prompt-box">
+                <div class="prompt-mini"><strong>第 1 步：确定最终格式</strong>例如：Markdown 表格、JSON、HTML 页面、设计 Brief、组件清单。</div>
+                <div class="prompt-mini"><strong>第 2 步：列出字段</strong>例如：模块名称、用户目的、组件需求、交互状态、视觉重点、优先级。</div>
+                <div class="prompt-mini"><strong>第 3 步：把字段变成问题</strong>每个字段都对应一个需要告诉 GPT 的信息或让 GPT 推导的任务。</div>
+                <div class="prompt-mini"><strong>第 4 步：补充边界</strong>说明产品、用户、页面目标、风格、设备、不要出现的内容。</div>
+                <div class="prompt-mini"><strong>第 5 步：写成完整 Prompt</strong>把角色、背景、任务、约束、输出格式组合成一段可执行指令。</div>
+              </div>
+            </div>
+
+            <div class="example-card">
+              <h3>字段如何反推 Prompt 内容</h3>
+              <div class="table-like">
+                <div class="table-row header"><div>想要的输出字段</div><div>需要反推的问题</div><div>Prompt 里要补什么</div></div>
+                <div class="table-row"><div>模块名称</div><div>页面需要分成哪些区域？</div><div>页面类型、核心任务、业务流程。</div></div>
+                <div class="table-row"><div>用户目的</div><div>用户为什么看这个模块？</div><div>目标用户、使用场景、用户痛点。</div></div>
+                <div class="table-row"><div>组件需求</div><div>这个模块由哪些 UI 元素组成？</div><div>按钮、卡片、列表、标签、导航、表单。</div></div>
+                <div class="table-row"><div>交互状态</div><div>用户点击、加载、错误、空状态怎么办？</div><div>默认、悬停、点击、加载、空状态、错误状态。</div></div>
+                <div class="table-row"><div>视觉重点</div><div>什么信息最突出？风格如何控制？</div><div>视觉关键词、层级、颜色、留白、负向限制。</div></div>
+              </div>
+              <div class="callout"><strong>核心技巧：</strong>不要先问“帮我写 Prompt”，而是先问“我最终要什么格式”。格式越清楚，Prompt 越容易倒推完整。</div>
+            </div>
+          </div>
+
+          <div class="template-grid" style="margin-top:18px;">
+            <div class="template-card">
+              <h3>示例：从表格格式反推 Prompt</h3>
+              <p>假设你最终想得到下面这个表格，就可以倒推出必须写清页面、用户、模块、组件、交互和视觉约束。</p>
+              <div class="code-block">
+                <div class="code-title"><span>TARGET_OUTPUT_TABLE.md</span><button class="copy-btn" data-copy="target-output-table">复制</button></div>
+                <pre id="target-output-table">我想让 GPT 最终输出这个表格格式：
+
+| 模块名称 | 用户目的 | 内容说明 | 组件需求 | 交互状态 | 视觉重点 | 优先级 |
+|---|---|---|---|---|---|---|
+| 顶部问候 | 让用户快速进入今日任务 | 显示问候语、学习天数、今日目标 | 头像、标题、进度标签、主 CTA | 点击进入学习计划 | 强化主 CTA，减少干扰 | 高 |
+
+因此 Prompt 里必须补充：
+1. 产品是什么
+2. 用户是谁
+3. 页面目标是什么
+4. 需要分析哪些模块
+5. 组件和交互要细到什么程度
+6. 视觉风格和负向限制是什么</pre>
+              </div>
+            </div>
+
+            <div class="template-card">
+              <h3>可复制：反推式 Prompt 模板</h3>
+              <p>把“我要什么格式”写在前面，再让 GPT 帮你补全内容。</p>
+              <div class="code-block">
+                <div class="code-title"><span>REVERSE_PROMPT_TEMPLATE.md</span><button class="copy-btn" data-copy="reverse-prompt-template">复制</button></div>
+                <pre id="reverse-prompt-template">你是一个资深 Prompt 工程师和 UI/UX 设计师。
+
+我希望最终得到以下输出格式：
+{粘贴你想要的表格字段、JSON 字段、HTML 结构或设计说明目录}
+
+请你根据这个输出格式，反推出我应该提供给 GPT 的完整提示词内容。
+
+要求你输出：
+1. 这个格式需要哪些输入信息
+2. 每个字段分别对应 Prompt 中的什么要求
+3. 我当前缺少哪些背景信息
+4. 一版可直接复制使用的完整 Prompt
+5. 一版更通用、可替换变量的 Prompt 模板
+
+请用清晰的小标题和 Markdown 表格输出。</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="final-cta">
+      <h2>Prompt 的本质，是把想法变成可以被执行的设计需求。</h2>
+      <p>当你能清楚说明角色、背景、任务、约束和输出格式，GPT 就不只是聊天工具，而会成为 UI 设计流程中的结构化助手。</p>
+    </section>
+  </div>
+
+  <script>
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach((button) => {
+      button.addEventListener('click', async () => {
+        const target = document.getElementById(button.dataset.copy);
+        if (!target) return;
+        try {
+          await navigator.clipboard.writeText(target.innerText.trim());
+          const oldText = button.textContent;
+          button.textContent = '已复制';
+          setTimeout(() => button.textContent = oldText, 1200);
+        } catch (error) {
+          button.textContent = '复制失败';
+          setTimeout(() => button.textContent = '复制', 1200);
+        }
+      });
+    });
+
+    const links = Array.from(document.querySelectorAll('.nav a'));
+    const sections = links.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id));
+        }
+      });
+    }, { rootMargin: '-32% 0px -58% 0px', threshold: 0.01 });
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
