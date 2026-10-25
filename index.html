@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI设计学习导航</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --sidebar: #171922;
+      --sidebar-muted: #aeb2c1;
+      --sidebar-active: #2f6df6;
+      --surface: #eef1f6;
+      --line: #d9deea;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      overflow: hidden;
+      background: var(--surface);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .sidebar {
+      width: 280px;
+      flex: 0 0 280px;
+      display: flex;
+      flex-direction: column;
+      background: var(--sidebar);
+      color: #fff;
+      border-right: 1px solid #2a2d39;
+    }
+    .brand {
+      padding: 24px 22px 18px;
+      border-bottom: 1px solid #2a2d39;
+    }
+    .brand h1 { margin: 0; font-size: 19px; line-height: 1.4; letter-spacing: .02em; }
+    .brand p { margin: 6px 0 0; color: var(--sidebar-muted); font-size: 12px; letter-spacing: .16em; }
+    .nav {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 12px 24px;
+    }
+    .nav-group { margin: 0 0 18px; }
+    .nav-label {
+      padding: 0 10px 8px;
+      color: #777d91;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 9px;
+      padding: 10px;
+      background: transparent;
+      color: var(--sidebar-muted);
+      cursor: grab;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: left;
+      transition: background .16s ease, color .16s ease;
+    }
+    .nav-item:active { cursor: grabbing; }
+    .nav-item.dragging { opacity: .42; background: #30364a; }
+    .nav-item.drop-target { box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
+    .nav-item:hover, .nav-item:focus-visible { background: #252938; color: #fff; outline: none; }
+    .nav-item.active { background: var(--sidebar-active); color: #fff; box-shadow: 0 6px 18px rgba(47,109,246,.24); }
+    .nav-index { width: 22px; flex: 0 0 22px; color: #7f879b; font-size: 11px; text-align: center; }
+    .nav-item.active .nav-index { color: rgba(255,255,255,.82); }
+    .footer { padding: 12px 22px 16px; color: #72798b; font-size: 11px; line-height: 1.5; border-top: 1px solid #2a2d39; }
+    .content { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+    .toolbar {
+      height: 48px;
+      flex: 0 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      color: #5c6374;
+      font-size: 12px;
+    }
+    .current-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .open-link { color: #2f6df6; text-decoration: none; white-space: nowrap; }
+    .open-link:hover { text-decoration: underline; }
+    iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: #fff; }
+    @media (max-width: 760px) {
+      .sidebar { width: 220px; flex-basis: 220px; }
+      .brand { padding: 18px 16px 14px; }
+      .brand h1 { font-size: 16px; }
+      .nav { padding: 12px 8px 18px; }
+      .nav-item { padding: 9px 8px; font-size: 12px; }
+      .footer { padding: 10px 16px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="课程页面导航">
+    <div class="brand">
+      <h1>AI设计知识库</h1>
+      <p>Design Engineer</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-label">设计思考</div>
+        <button class="nav-item course-item" draggable="true" data-page="环境搭建与设计准备.html" data-title="环境搭建与设计准备">
+          <span class="nav-index">01</span><span>环境搭建与设计准备</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="图像生成基础.html" data-title="图像生成基础">
+          <span class="nav-index">02</span><span>图像生成基础</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="新老 UI 工作流程差异.html" data-title="新老 UI 工作流程差异">
+          <span class="nav-index">03</span><span>新老 UI 工作流程差异</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="AI时代 UI 设计思维重塑.html" data-title="AI时代 UI 设计思维重塑">
+          <span class="nav-index">04</span><span>AI时代 UI 设计思维重塑</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="日常思考.html" data-title="设计竞争力的思考">
+          <span class="nav-index">05</span><span>设计竞争力的思考</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="UI 设计基础理论.html" data-title="UI 设计基础理论">
+          <span class="nav-index">06</span><span>UI 设计基础理论</span>
+        </button>
+        <button class="nav-item course-item" draggable="true" data-page="GPT 基础入门与 Prompt 结构.html" data-title="GPT的运用与Prompt 结构">
+          <span class="nav-index">07</span><span>GPT的运用与Prompt 结构</span>
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">参考工具</div>
+        <button class="nav-item" data-page="生成网页 UI.html" data-title="生成网页 UI">
+          <span class="nav-index">08</span><span>生成网页 UI</span>
+        </button>
+        <button class="nav-item" data-page="../web动效提示词.html" data-title="Web 动效提示词">
+          <span class="nav-index">09</span><span>Web 动效提示词</span>
+        </button>
+      </div>
+    </nav>
+  </aside>
+  <main class="content">
+    <div class="toolbar">
+      <span class="current-title" id="currentTitle">请选择左侧页面</span>
+      <a class="open-link" id="openLink" href="#" target="_blank" rel="noopener">新窗口打开</a>
+    </div>
+    <iframe id="pageFrame" title="课程内容" src="about:blank"></iframe>
+  </main>
+  <script>
+    (() => {
+      const items = [...document.querySelectorAll('.nav-item')];
+      const courseGroup = document.querySelector('.nav-group');
+      const courseItems = () => [...courseGroup.querySelectorAll('.course-item')];
+      const frame = document.getElementById('pageFrame');
+      const title = document.getElementById('currentTitle');
+      const openLink = document.getElementById('openLink');
+      const orderStorageKey = 'youshe-ui-course-order-v1';
+      let dragged = null;
+      let currentItem = null;
+
+      const pad = value => String(value).padStart(2, '0');
+
+      function refreshSequence() {
+        courseItems().forEach((item, index) => {
+          item.querySelector('.nav-index').textContent = pad(index + 1);
+          item.dataset.sequence = String(index + 1);
+          item.setAttribute('aria-posinset', String(index + 1));
+          item.setAttribute('aria-setsize', String(courseItems().length));
+        });
+        try {
+          localStorage.setItem(orderStorageKey, JSON.stringify(courseItems().map(item => item.dataset.page)));
+        } catch (_) {}
+      }
+
+      function restoreSequence() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(orderStorageKey) || '[]');
+          const byPage = new Map(courseItems().map(item => [item.dataset.page, item]));
+          saved.forEach(page => {
+            const item = byPage.get(page);
+            if (item) courseGroup.appendChild(item);
+          });
+        } catch (_) {}
+        refreshSequence();
+      }
+
+      function installDragEvents() {
+        courseItems().forEach(item => {
+          item.addEventListener('dragstart', event => {
+            dragged = item;
+            item.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', item.dataset.page);
+          });
+          item.addEventListener('dragover', event => {
+            event.preventDefault();
+            if (!dragged || dragged === item) return;
+            item.classList.add('drop-target');
+            const rect = item.getBoundingClientRect();
+            const insertBefore = event.clientY < rect.top + rect.height / 2;
+            courseGroup.insertBefore(dragged, insertBefore ? item : item.nextSibling);
+            refreshSequence();
+          });
+          item.addEventListener('dragleave', () => item.classList.remove('drop-target'));
+          item.addEventListener('dragend', () => {
+            dragged?.classList.remove('dragging');
+            items.forEach(node => node.classList.remove('drop-target'));
+            dragged = null;
+            refreshSequence();
+          });
+        });
+      }
+
+      function select(item, updateHash = true) {
+        currentItem = item;
+        items.forEach(node => node.classList.toggle('active', node === item));
+        const page = item.dataset.page;
+        frame.src = page;
+        frame.title = item.dataset.title;
+        title.textContent = item.dataset.title;
+        openLink.href = page;
+        if (updateHash) location.hash = encodeURIComponent(page);
+      }
+
+      function selectFromHash() {
+        const page = decodeURIComponent(location.hash.slice(1));
+        const item = items.find(node => node.dataset.page === page) || items[0];
+        select(item, false);
+      }
+
+      items.forEach(item => item.addEventListener('click', () => select(item)));
+      window.addEventListener('hashchange', selectFromHash);
+      restoreSequence();
+      installDragEvents();
+      selectFromHash();
+    })();
+  </script>
+</body>
+</html>
