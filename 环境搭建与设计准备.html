@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>环境搭建与设计准备</title>
+<style>
+:root {
+  --bg:#f7efe4; --paper:#fffdf8; --paper2:#fff8ef; --ink:#28231f; --muted:#665d54; --soft:#8f8175;
+  --line:#dfd0bd; --line2:rgba(223,208,189,.72); --accent:#cf735f; --accent2:#9c4f43; --sage:#6f9d87; --sage2:#3d755f;
+  --gold:#d1aa5f; --blue:#526fa8; --shadow:0 18px 50px rgba(73,50,28,.10); --shadow2:0 10px 28px rgba(73,50,28,.07);
+  --r-xl:30px; --r-lg:22px; --r-md:16px; --max:1680px;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.68;background:radial-gradient(circle at 7% 3%,rgba(207,115,95,.16),transparent 30%),radial-gradient(circle at 90% 8%,rgba(111,157,135,.14),transparent 30%),linear-gradient(180deg,#fffaf2 0%,var(--bg) 48%,#fffaf2 100%);-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(210,196,178,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(210,196,178,.18) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(180deg,rgba(0,0,0,.72),transparent 86%)}
+.page{position:relative;z-index:1;width:min(var(--max),calc(100% - 48px));margin:0 auto;padding:24px 0 84px}
+.topbar{position:sticky;top:14px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 18px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,248,.92);backdrop-filter:blur(15px);box-shadow:0 12px 30px rgba(73,50,28,.08)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.04em;white-space:nowrap} .brand-mark{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:linear-gradient(135deg,#fff7ed,#f3ddd4);color:var(--accent2)}
+.actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap} input.search{width:min(460px,42vw);height:42px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.72);padding:0 15px;font:inherit;color:var(--ink);outline:none} input.search:focus{border-color:rgba(207,115,95,.62);box-shadow:0 0 0 4px rgba(207,115,95,.10)} button,a.small-btn{appearance:none;text-decoration:none;border:1px solid var(--line2);border-radius:999px;background:rgba(255,253,248,.78);color:var(--muted);font:inherit;font-weight:850;cursor:pointer;padding:9px 12px;transition:.18s ease} button:hover,a.small-btn:hover{transform:translateY(-1px);border-color:rgba(207,115,95,.42);color:var(--accent2);background:#fffaf3}
+.hero{position:relative;overflow:hidden;margin-top:22px;padding:clamp(32px,5vw,72px);border:1px solid var(--line);border-radius:var(--r-xl);background:radial-gradient(circle at 12% 10%,rgba(207,115,95,.14),transparent 32%),radial-gradient(circle at 88% 6%,rgba(111,157,135,.12),transparent 34%),linear-gradient(135deg,rgba(255,253,248,.96),rgba(255,247,237,.88));box-shadow:var(--shadow)}
+.hero:after{content:"DESIGN KIT";position:absolute;right:-8px;bottom:-32px;font-size:clamp(60px,11vw,170px);font-weight:950;letter-spacing:-.08em;color:rgba(156,79,67,.07);line-height:1;pointer-events:none}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 13px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,253,248,.74);color:var(--accent2);font-weight:950;font-size:13px;letter-spacing:.08em} .eyebrow:before{content:"✦"}
+h1{position:relative;z-index:1;margin:18px 0 12px;font-size:clamp(42px,6.8vw,100px);line-height:.98;letter-spacing:-.065em;max-width:1120px} .lead{position:relative;z-index:1;max-width:940px;margin:0;color:var(--muted);font-size:clamp(17px,1.35vw,22px)}
+.stats{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap;margin-top:24px} .stat{padding:10px 14px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.58);font-weight:900;color:#51483f} .stat b{color:var(--accent2)}
+.nav-panel{display:grid;gap:12px;margin:18px 0 0;padding:18px;border:1px solid var(--line);border-radius:var(--r-lg);background:rgba(255,253,248,.76);box-shadow:var(--shadow2)} .nav-title{font-weight:950;color:var(--accent2);letter-spacing:-.03em} .nav-chips{display:flex;gap:8px;flex-wrap:wrap} .nav-chips a{text-decoration:none;padding:8px 12px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,248,238,.78);color:var(--muted);font-size:13px;font-weight:900} .nav-chips a:hover{color:var(--accent2);border-color:rgba(207,115,95,.42)}
+.status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 8px;color:var(--muted);font-weight:850} #statusText b{color:var(--accent2)}
+.section-block{scroll-margin-top:100px;margin-top:28px;padding:clamp(22px,3.5vw,42px);border:1px solid var(--line);border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(255,253,248,.94),rgba(255,248,238,.86));box-shadow:var(--shadow2)}
+.section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.52fr);gap:18px;align-items:end;margin-bottom:20px} .section-kicker{display:inline-flex;width:max-content;padding:6px 11px;border-radius:999px;border:1px solid var(--line2);background:rgba(243,221,212,.66);color:var(--accent2);font-size:12px;font-weight:950;letter-spacing:.08em} .section-head h2{margin:10px 0 0;font-size:clamp(28px,4vw,60px);line-height:1.05;letter-spacing:-.055em} .section-head p{margin:0;color:var(--muted);font-size:16px}
+.cards-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px} .card{scroll-margin-top:110px;display:flex;flex-direction:column;min-height:255px;padding:18px;border:1px solid var(--line2);border-radius:var(--r-lg);background:linear-gradient(180deg,rgba(255,253,248,.96),rgba(255,248,238,.90));box-shadow:0 7px 22px rgba(73,50,28,.055);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease} .card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(73,50,28,.09);border-color:rgba(201,181,159,.95)}
+.card.is-hidden{display:none} .card-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px} .num{display:inline-grid;place-items:center;min-width:46px;height:32px;border-radius:999px;border:1px solid rgba(111,157,135,.34);background:#e7f0ea;color:var(--sage2);font-weight:950;font-size:13px} .section-pill{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;max-width:75%;padding:6px 10px;border:1px solid var(--line2);border-radius:999px;background:rgba(243,221,212,.56);color:var(--accent2);font-size:12px;font-weight:950}
+.card h3{margin:0 0 10px;font-size:clamp(20px,1.5vw,27px);line-height:1.16;letter-spacing:-.045em} .card p{margin:0;color:var(--muted);font-size:15px} .points-wrap{margin-top:auto;padding-top:16px} .points-title{display:inline-flex;margin-bottom:8px;color:var(--soft);font-size:12px;font-weight:950;letter-spacing:.08em} .points{display:flex;gap:7px;flex-wrap:wrap} .point-btn{padding:6px 9px;font-size:12px;line-height:1;border-radius:999px;background:rgba(255,247,237,.9);border:1px solid rgba(223,208,189,.8);color:#6b5d52;font-weight:900;box-shadow:none} .point-btn:hover{background:#fffdf8;color:var(--accent2);border-color:rgba(207,115,95,.44)}
+.empty{display:none;margin:26px 0;padding:24px;border:1px dashed var(--line);border-radius:var(--r-lg);background:rgba(255,253,248,.78);color:var(--muted);text-align:center;font-weight:850} .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:999px;background:#2f2924;color:#fffaf2;font-weight:900;z-index:99;transition:.2s ease} .toast.show{opacity:1;transform:translate(-50%,0)}
+@media (min-width:1800px){:root{--max:1760px}.page{width:min(var(--max),calc(100% - 72px))}} @media (max-width:1320px){.cards-grid{grid-template-columns:repeat(3,minmax(0,1fr))}} @media (max-width:980px){.page{width:min(100% - 28px,var(--max));padding-top:14px}.topbar{position:relative;top:0;border-radius:24px;align-items:flex-start;flex-direction:column} input.search{width:100%} .actions{width:100%;justify-content:flex-start} .section-head{grid-template-columns:1fr} .cards-grid{grid-template-columns:repeat(2,minmax(0,1fr))}} @media (max-width:640px){.cards-grid{grid-template-columns:1fr} .hero{padding:26px 18px} .section-block{padding:18px}}
+@media print{body{background:#fff}body:before,.topbar,.nav-panel,.actions,.toast{display:none!important}.page{width:100%;padding:0}.hero,.section-block{box-shadow:none;break-inside:avoid}.cards-grid{grid-template-columns:repeat(2,1fr)}.card{break-inside:avoid;box-shadow:none}}
+    /* 移除内容导航与学习导览模块 */
+    .nav-panel,#sec-01{display:none !important}
+    /* 当前页面隐藏统计提示行，以及所有卡片顶部模块标签 */
+    .status-row{display:none !important}
+    .card[data-section="02 设计前准备逻辑"] .section-pill{display:none !important}
+    .card .section-pill{display:none !important}
+    .card-meta,.num{display:none !important}
+    .card h3{display:flex;align-items:center;gap:16px;margin:0 0 14px;font-size:28px !important;line-height:1.25 !important}
+    .card h3::before{content:"";display:block;flex:0 0 10px;width:10px;height:44px;border-radius:999px;background:linear-gradient(180deg,#d98270,#f0c77c)}
+    @media (max-width:640px){.card h3{font-size:24px !important}.card h3::before{height:38px}}
+    /* 卡片视觉与 AI时代 UI 设计思维重塑页面保持一致 */
+    .card{position:relative;overflow:hidden;min-height:180px;padding:24px;border-radius:var(--r-lg);background:linear-gradient(180deg,var(--paper),var(--paper2));box-shadow:0 4px 12px rgba(73,50,28,.045)}
+    .card::before{content:"";position:absolute;left:20px;top:24px;width:6px;height:40px;border-radius:999px;background:linear-gradient(180deg,var(--accent),rgba(216,183,111,.72))}
+    .card h3{display:block;margin:0 0 11px;padding-left:18px;font-size:28px !important;line-height:1.22 !important;letter-spacing:-.04em}
+    .card h3::before{content:none !important;display:none !important}
+    @media (max-width:640px){.card{padding:22px}.card h3{font-size:24px !important}}
+    /* 最终统一字体规则：以 48px 为一级标题基准 */
+    *,*::before,*::after{font-size:inherit !important;line-height:inherit !important}
+    body{font-size:16px !important;line-height:1.6 !important}
+    h1{font-size:64px !important;line-height:1.12 !important}
+    h2{font-size:40px !important;line-height:1.2 !important}
+    h3{font-size:28px !important;line-height:1.25 !important}
+    h4{font-size:22px !important;line-height:1.3 !important}
+    h5,h6{font-size:20px !important;line-height:1.35 !important}
+    p,li,td,th,label,button,input,textarea,select{font-size:16px !important;line-height:1.6 !important}
+    small,.caption,.eyebrow,.section-tag,.card-kicker,.visual-kicker,.flow-tag,.pill,.nav a{font-size:14px !important;line-height:1.45 !important}
+    @media (max-width:620px){h1{font-size:40px !important}h2{font-size:30px !important}h3{font-size:22px !important}h4{font-size:18px !important}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <div class="brand"><span>环境搭建与设计准备</span></div>
+    <div class="actions">
+      <input id="searchInput" class="search" type="search" placeholder="搜索关键词 / 点击卡片标签快速定位" />
+      <button id="resetBtn" type="button">清除筛选</button>
+      <button id="copyAllBtn" type="button">复制内容</button>
+      <button id="printBtn" type="button">打印</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow">UI 设计基础</span>
+    <h1>环境搭建与设计准备</h1>
+    <p class="lead">从工具入口、账号权限、Figma 工作区到素材资源与 UI 规范，建立一套稳定、清晰、可复用的设计工作流。</p>
+    <div class="stats"><span class="stat"><b>9</b> 个内容模块</span><span class="stat"><b>107</b> 个知识点</span><span class="stat">工具入口</span><span class="stat">Figma 工作区</span><span class="stat">素材与规范</span></div>
+  </section>
+
+  <aside class="nav-panel">
+    <div class="nav-title">内容导航</div>
+    <nav class="nav-chips"><a href="#sec-01">01 学习导览</a><a href="#sec-02">02 设计前准备逻辑</a><a href="#sec-03">03 工具地图</a><a href="#sec-04">04 账号权限与安全</a><a href="#sec-05">05 Figma 环境</a><a href="#sec-06">06 基础资源</a><a href="#sec-07">07 资源创建流程</a><a href="#sec-08">08 UI 基础规范</a><a href="#sec-09">09 最短执行流程</a><a href="#sec-10">10 准备清单</a></nav>
+  </aside>
+
+  <div class="status-row"><div id="statusText">显示 <b>107</b> / 107 张卡片</div><div>点击关键词按钮 = 按关键词定位；双击按钮 = 复制关键词</div></div>
+  <div id="emptyState" class="empty">没有找到匹配卡片，试试换一个关键词，或点击“清除筛选”。</div>
+
+  <main id="cardRoot">
+<section class="section-block" id="sec-01">
+  <div class="section-head">
+    <div><span class="section-kicker">01 学习导览</span><h2>学习导览</h2></div>
+    <p>先建立本节课的价值感：为什么要先准备环境，而不是直接开始画图。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-001" data-section="01 学习导览" data-search="01 学习导览 课程主题 本节课主题是「环境搭建与设计准备」，重点不是马上画页面，而是先把工具、账号、素材和工作区整理好。 课程主题 环境搭建 设计准备">
+  <div class="card-meta"><span class="num">001</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>课程主题</h3>
+  <p>本节课主题是「环境搭建与设计准备」，重点不是马上画页面，而是先把工具、账号、素材和工作区整理好。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="课程主题">课程主题</button><button type="button" class="point-btn" data-point="环境搭建">环境搭建</button><button type="button" class="point-btn" data-point="设计准备">设计准备</button></div>
+  </div>
+</article>
+<article class="card" id="card-002" data-section="01 学习导览" data-search="01 学习导览 先搭环境再创作 设计前的准备会直接影响后续效率。环境稳定，后面做 AI 生成、UI 编辑、动效和前端练习时才不会频繁被打断。 先准备 减少中断 稳定工作流">
+  <div class="card-meta"><span class="num">002</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>先搭环境再创作</h3>
+  <p>设计前的准备会直接影响后续效率。环境稳定，后面做 AI 生成、UI 编辑、动效和前端练习时才不会频繁被打断。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="先准备">先准备</button><button type="button" class="point-btn" data-point="减少中断">减少中断</button><button type="button" class="point-btn" data-point="稳定工作流">稳定工作流</button></div>
+  </div>
+</article>
+<article class="card" id="card-003" data-section="01 学习导览" data-search="01 学习导览 本课核心目标 完成一套可持续使用的设计环境，而不是临时注册一堆账号。 可持续 不是临时 工作环境">
+  <div class="card-meta"><span class="num">003</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>本课核心目标</h3>
+  <p>完成一套可持续使用的设计环境，而不是临时注册一堆账号。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="可持续">可持续</button><button type="button" class="point-btn" data-point="不是临时">不是临时</button><button type="button" class="point-btn" data-point="工作环境">工作环境</button></div>
+  </div>
+</article>
+<article class="card" id="card-004" data-section="01 学习导览" data-search="01 学习导览 学习结果 完成后应能正常使用常用 AI 工具、Figma、素材文件夹和基础命名规则。 AI 工具 Figma 文件管理">
+  <div class="card-meta"><span class="num">004</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>学习结果</h3>
+  <p>完成后应能正常使用常用 AI 工具、Figma、素材文件夹和基础命名规则。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="AI 工具">AI 工具</button><button type="button" class="point-btn" data-point="Figma">Figma</button><button type="button" class="point-btn" data-point="文件管理">文件管理</button></div>
+  </div>
+</article>
+<article class="card" id="card-005" data-section="01 学习导览" data-search="01 学习导览 最终产物 本课最终要得到一个练习专用 Figma 文件、一套素材文件夹，以及可继续复用的 Prompt 与导出目录。 最终产物 练习文件 素材文件夹">
+  <div class="card-meta"><span class="num">005</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>最终产物</h3>
+  <p>本课最终要得到一个练习专用 Figma 文件、一套素材文件夹，以及可继续复用的 Prompt 与导出目录。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="最终产物">最终产物</button><button type="button" class="point-btn" data-point="练习文件">练习文件</button><button type="button" class="point-btn" data-point="素材文件夹">素材文件夹</button></div>
+  </div>
+</article>
+<article class="card" id="card-006" data-section="01 学习导览" data-search="01 学习导览 学习路径 建议浏览顺序：目标 → 工具 → 账号安全 → Figma → 基础资源 → 资源流程 → UI 规范 → 最短执行 → 检查清单。 学习顺序 内容结构 浏览路径">
+  <div class="card-meta"><span class="num">006</span><a class="section-pill" href="#sec-01">01 学习导览</a></div>
+  <h3>学习路径</h3>
+  <p>建议浏览顺序：目标 → 工具 → 账号安全 → Figma → 基础资源 → 资源流程 → UI 规范 → 最短执行 → 检查清单。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="学习顺序">学习顺序</button><button type="button" class="point-btn" data-point="内容结构">内容结构</button><button type="button" class="point-btn" data-point="浏览路径">浏览路径</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-02">
+  <div class="section-head">
+    <div><span class="section-kicker">02 设计前准备逻辑</span><h2>设计前准备逻辑</h2></div>
+    <p></p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-007" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 工具可用 先确认 GPT、Gemini、Figma、图像生成工具等常用入口可以正常打开和使用。 工具可用 入口检查 正常打开">
+  <div class="card-meta"><span class="num">007</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>工具可用</h3>
+  <p>先确认 GPT、Gemini、Figma、图像生成工具等常用入口可以正常打开和使用。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="工具可用">工具可用</button><button type="button" class="point-btn" data-point="入口检查">入口检查</button><button type="button" class="point-btn" data-point="正常打开">正常打开</button></div>
+  </div>
+</article>
+<article class="card" id="card-008" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 权限清楚 不同工具有免费版、订阅版、试用版，功能额度和稳定性不同，实操前要先确认边界。 权限清楚 免费版 订阅版">
+  <div class="card-meta"><span class="num">008</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>权限清楚</h3>
+  <p>不同工具有免费版、订阅版、试用版，功能额度和稳定性不同，实操前要先确认边界。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="权限清楚">权限清楚</button><button type="button" class="point-btn" data-point="免费版">免费版</button><button type="button" class="point-btn" data-point="订阅版">订阅版</button></div>
+  </div>
+</article>
+<article class="card" id="card-009" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 资源归位 字体、图标、参考图、Moodboard、品牌色、竞品截图要放在固定位置，避免边做边找。 资源归位 素材管理 固定位置">
+  <div class="card-meta"><span class="num">009</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>资源归位</h3>
+  <p>字体、图标、参考图、Moodboard、品牌色、竞品截图要放在固定位置，避免边做边找。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="资源归位">资源归位</button><button type="button" class="point-btn" data-point="素材管理">素材管理</button><button type="button" class="point-btn" data-point="固定位置">固定位置</button></div>
+  </div>
+</article>
+<article class="card" id="card-010" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 命名统一 Prompt、设计稿、AI 输出图、导出文件都要能从文件名看出项目、用途和版本。 命名统一 版本管理 可追踪">
+  <div class="card-meta"><span class="num">010</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>命名统一</h3>
+  <p>Prompt、设计稿、AI 输出图、导出文件都要能从文件名看出项目、用途和版本。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="命名统一">命名统一</button><button type="button" class="point-btn" data-point="版本管理">版本管理</button><button type="button" class="point-btn" data-point="可追踪">可追踪</button></div>
+  </div>
+</article>
+<article class="card" id="card-011" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 少装插件 插件不是越多越好。只保留当前练习真正会用到、来源稳定、功能清楚的插件。 少装插件 稳定性 插件控制">
+  <div class="card-meta"><span class="num">011</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>少装插件</h3>
+  <p>插件不是越多越好。只保留当前练习真正会用到、来源稳定、功能清楚的插件。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="少装插件">少装插件</button><button type="button" class="point-btn" data-point="稳定性">稳定性</button><button type="button" class="point-btn" data-point="插件控制">插件控制</button></div>
+  </div>
+</article>
+<article class="card" id="card-012" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 不要被工具绑架 工具只是完成设计的辅助。真正要训练的是需求判断、风格判断、结构拆解和方案迭代能力。 工具辅助 设计判断 方案迭代">
+  <div class="card-meta"><span class="num">012</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>不要被工具绑架</h3>
+  <p>工具只是完成设计的辅助。真正要训练的是需求判断、风格判断、结构拆解和方案迭代能力。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="工具辅助">工具辅助</button><button type="button" class="point-btn" data-point="设计判断">设计判断</button><button type="button" class="point-btn" data-point="方案迭代">方案迭代</button></div>
+  </div>
+</article>
+<article class="card" id="card-013" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 减少重复劳动 建立固定文件结构和命名规则，是为了让后续每次练习都能快速复用资源。 复用资源 减少重复 文件结构">
+  <div class="card-meta"><span class="num">013</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>减少重复劳动</h3>
+  <p>建立固定文件结构和命名规则，是为了让后续每次练习都能快速复用资源。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="复用资源">复用资源</button><button type="button" class="point-btn" data-point="减少重复">减少重复</button><button type="button" class="point-btn" data-point="文件结构">文件结构</button></div>
+  </div>
+</article>
+<article class="card" id="card-014" data-section="02 设计前准备逻辑" data-search="02 设计前准备逻辑 形成闭环 准备工作不是孤立动作，而是为了形成从需求、Prompt、素材、Figma 到导出的完整闭环。 完整闭环 从需求到导出 工作流">
+  <div class="card-meta"><span class="num">014</span><a class="section-pill" href="#sec-02">02 设计前准备逻辑</a></div>
+  <h3>形成闭环</h3>
+  <p>准备工作不是孤立动作，而是为了形成从需求、Prompt、素材、Figma 到导出的完整闭环。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="完整闭环">完整闭环</button><button type="button" class="point-btn" data-point="从需求到导出">从需求到导出</button><button type="button" class="point-btn" data-point="工作流">工作流</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-03">
+  <div class="section-head">
+    <div><span class="section-kicker">03 工具地图</span><h2>工具地图</h2></div>
+    <p>不同工具负责不同环节，先判断任务类型，再选择工具。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-015" data-section="03 工具地图" data-search="03 工具地图 GPT 的定位 GPT 适合做需求拆解、Prompt 生成、文案整理、结构规划和代码辅助。 GPT 需求拆解 Prompt">
+  <div class="card-meta"><span class="num">015</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>GPT 的定位</h3>
+  <p>GPT 适合做需求拆解、Prompt 生成、文案整理、结构规划和代码辅助。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="GPT">GPT</button><button type="button" class="point-btn" data-point="需求拆解">需求拆解</button><button type="button" class="point-btn" data-point="Prompt">Prompt</button></div>
+  </div>
+</article>
+<article class="card" id="card-016" data-section="03 工具地图" data-search="03 工具地图 GPT 写 Prompt 当需求只有一句话时，可以让 GPT 拆成页面结构、功能模块、视觉要求和交互状态。 Prompt 优化 页面结构 功能模块">
+  <div class="card-meta"><span class="num">016</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>GPT 写 Prompt</h3>
+  <p>当需求只有一句话时，可以让 GPT 拆成页面结构、功能模块、视觉要求和交互状态。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Prompt 优化">Prompt 优化</button><button type="button" class="point-btn" data-point="页面结构">页面结构</button><button type="button" class="point-btn" data-point="功能模块">功能模块</button></div>
+  </div>
+</article>
+<article class="card" id="card-017" data-section="03 工具地图" data-search="03 工具地图 GPT 做文案 页面标题、按钮文案、说明文案、空状态文案和交互说明，都可以先用 GPT 生成初稿。 页面文案 按钮文案 交互说明">
+  <div class="card-meta"><span class="num">017</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>GPT 做文案</h3>
+  <p>页面标题、按钮文案、说明文案、空状态文案和交互说明，都可以先用 GPT 生成初稿。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="页面文案">页面文案</button><button type="button" class="point-btn" data-point="按钮文案">按钮文案</button><button type="button" class="point-btn" data-point="交互说明">交互说明</button></div>
+  </div>
+</article>
+<article class="card" id="card-018" data-section="03 工具地图" data-search="03 工具地图 GPT 辅助代码 在 HTML、CSS、前端练习中，GPT 可以帮助生成结构、排查问题和解释代码逻辑。 代码辅助 HTML CSS 问题排查">
+  <div class="card-meta"><span class="num">018</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>GPT 辅助代码</h3>
+  <p>在 HTML、CSS、前端练习中，GPT 可以帮助生成结构、排查问题和解释代码逻辑。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="代码辅助">代码辅助</button><button type="button" class="point-btn" data-point="HTML CSS">HTML CSS</button><button type="button" class="point-btn" data-point="问题排查">问题排查</button></div>
+  </div>
+</article>
+<article class="card" id="card-019" data-section="03 工具地图" data-search="03 工具地图 GPT 分析资料 截图、文件、设计稿逻辑和课程内容，都可以用 GPT 辅助整理成可执行清单。 资料分析 截图分析 执行清单">
+  <div class="card-meta"><span class="num">019</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>GPT 分析资料</h3>
+  <p>截图、文件、设计稿逻辑和课程内容，都可以用 GPT 辅助整理成可执行清单。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="资料分析">资料分析</button><button type="button" class="point-btn" data-point="截图分析">截图分析</button><button type="button" class="point-btn" data-point="执行清单">执行清单</button></div>
+  </div>
+</article>
+<article class="card" id="card-020" data-section="03 工具地图" data-search="03 工具地图 Gemini 的定位 Gemini 适合多模态理解、长文档整理、图片分析和研究资料归纳。 Gemini 多模态 长文档">
+  <div class="card-meta"><span class="num">020</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>Gemini 的定位</h3>
+  <p>Gemini 适合多模态理解、长文档整理、图片分析和研究资料归纳。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Gemini">Gemini</button><button type="button" class="point-btn" data-point="多模态">多模态</button><button type="button" class="point-btn" data-point="长文档">长文档</button></div>
+  </div>
+</article>
+<article class="card" id="card-021" data-section="03 工具地图" data-search="03 工具地图 Gemini 看图 遇到界面截图、参考图、视觉风格图时，可以用 Gemini 辅助总结布局和风格特点。 看图分析 界面截图 风格总结">
+  <div class="card-meta"><span class="num">021</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>Gemini 看图</h3>
+  <p>遇到界面截图、参考图、视觉风格图时，可以用 Gemini 辅助总结布局和风格特点。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="看图分析">看图分析</button><button type="button" class="point-btn" data-point="界面截图">界面截图</button><button type="button" class="point-btn" data-point="风格总结">风格总结</button></div>
+  </div>
+</article>
+<article class="card" id="card-022" data-section="03 工具地图" data-search="03 工具地图 Gemini 读资料 长文档、视频资料、研究材料，可以用 Gemini 帮助提炼关键信息。 长文档 研究资料 信息提炼">
+  <div class="card-meta"><span class="num">022</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>Gemini 读资料</h3>
+  <p>长文档、视频资料、研究材料，可以用 Gemini 帮助提炼关键信息。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="长文档">长文档</button><button type="button" class="point-btn" data-point="研究资料">研究资料</button><button type="button" class="point-btn" data-point="信息提炼">信息提炼</button></div>
+  </div>
+</article>
+<article class="card" id="card-023" data-section="03 工具地图" data-search="03 工具地图 Figma 的定位 Figma 是主要设计工作区，用来完成界面编辑、组件管理、原型连接、协作和交付。 Figma 设计工作区 协作交付">
+  <div class="card-meta"><span class="num">023</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>Figma 的定位</h3>
+  <p>Figma 是主要设计工作区，用来完成界面编辑、组件管理、原型连接、协作和交付。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Figma">Figma</button><button type="button" class="point-btn" data-point="设计工作区">设计工作区</button><button type="button" class="point-btn" data-point="协作交付">协作交付</button></div>
+  </div>
+</article>
+<article class="card" id="card-024" data-section="03 工具地图" data-search="03 工具地图 Figma 管组件 按钮、卡片、导航、标签、输入框等基础组件应在 Figma 中统一管理。 组件管理 按钮卡片 统一样式">
+  <div class="card-meta"><span class="num">024</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>Figma 管组件</h3>
+  <p>按钮、卡片、导航、标签、输入框等基础组件应在 Figma 中统一管理。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="组件管理">组件管理</button><button type="button" class="point-btn" data-point="按钮卡片">按钮卡片</button><button type="button" class="point-btn" data-point="统一样式">统一样式</button></div>
+  </div>
+</article>
+<article class="card" id="card-025" data-section="03 工具地图" data-search="03 工具地图 图像生成工具 图像生成工具适合快速探索视觉方向、生成背景图、角色图、海报素材和 Moodboard。 图像生成 视觉探索 Moodboard">
+  <div class="card-meta"><span class="num">025</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>图像生成工具</h3>
+  <p>图像生成工具适合快速探索视觉方向、生成背景图、角色图、海报素材和 Moodboard。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="图像生成">图像生成</button><button type="button" class="point-btn" data-point="视觉探索">视觉探索</button><button type="button" class="point-btn" data-point="Moodboard">Moodboard</button></div>
+  </div>
+</article>
+<article class="card" id="card-026" data-section="03 工具地图" data-search="03 工具地图 动效与前端工具 动效和前端工具用于后续把静态设计变成可演示、可交互、可落地的作品。 动效工具 前端练习 作品落地">
+  <div class="card-meta"><span class="num">026</span><a class="section-pill" href="#sec-03">03 工具地图</a></div>
+  <h3>动效与前端工具</h3>
+  <p>动效和前端工具用于后续把静态设计变成可演示、可交互、可落地的作品。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="动效工具">动效工具</button><button type="button" class="point-btn" data-point="前端练习">前端练习</button><button type="button" class="point-btn" data-point="作品落地">作品落地</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-04">
+  <div class="section-head">
+    <div><span class="section-kicker">04 账号权限与安全</span><h2>账号权限与安全</h2></div>
+    <p>提前处理登录、额度、协作权限和安全边界，避免实操中断。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-027" data-section="04 账号权限与安全" data-search="04 账号权限与安全 工具入口确认 上课前先确认常用工具能正常访问，避免实操时卡在登录、网络或权限问题上。 入口确认 登录检查 实操不卡顿">
+  <div class="card-meta"><span class="num">027</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>工具入口确认</h3>
+  <p>上课前先确认常用工具能正常访问，避免实操时卡在登录、网络或权限问题上。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="入口确认">入口确认</button><button type="button" class="point-btn" data-point="登录检查">登录检查</button><button type="button" class="point-btn" data-point="实操不卡顿">实操不卡顿</button></div>
+  </div>
+</article>
+<article class="card" id="card-028" data-section="04 账号权限与安全" data-search="04 账号权限与安全 版本差异 免费版、订阅版、试用版在功能、额度、速度和可用性上可能不同，要提前说明。 版本差异 功能额度 可用性">
+  <div class="card-meta"><span class="num">028</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>版本差异</h3>
+  <p>免费版、订阅版、试用版在功能、额度、速度和可用性上可能不同，要提前说明。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="版本差异">版本差异</button><button type="button" class="point-btn" data-point="功能额度">功能额度</button><button type="button" class="point-btn" data-point="可用性">可用性</button></div>
+  </div>
+</article>
+<article class="card" id="card-029" data-section="04 账号权限与安全" data-search="04 账号权限与安全 图像生成额度 图像生成通常会涉及次数、速度、尺寸和清晰度限制，练习前要预留备用方案。 生成额度 次数限制 备用方案">
+  <div class="card-meta"><span class="num">029</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>图像生成额度</h3>
+  <p>图像生成通常会涉及次数、速度、尺寸和清晰度限制，练习前要预留备用方案。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="生成额度">生成额度</button><button type="button" class="point-btn" data-point="次数限制">次数限制</button><button type="button" class="point-btn" data-point="备用方案">备用方案</button></div>
+  </div>
+</article>
+<article class="card" id="card-030" data-section="04 账号权限与安全" data-search="04 账号权限与安全 文件上传限制 有些工具对文件大小、格式、上传次数有限制，整理资料时不要只依赖单一平台。 文件上传 格式限制 单一平台风险">
+  <div class="card-meta"><span class="num">030</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>文件上传限制</h3>
+  <p>有些工具对文件大小、格式、上传次数有限制，整理资料时不要只依赖单一平台。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="文件上传">文件上传</button><button type="button" class="point-btn" data-point="格式限制">格式限制</button><button type="button" class="point-btn" data-point="单一平台风险">单一平台风险</button></div>
+  </div>
+</article>
+<article class="card" id="card-031" data-section="04 账号权限与安全" data-search="04 账号权限与安全 协作席位 团队空间、共享文件、协作编辑可能受到席位限制，做小组作业前要确认权限。 协作席位 共享文件 团队空间">
+  <div class="card-meta"><span class="num">031</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>协作席位</h3>
+  <p>团队空间、共享文件、协作编辑可能受到席位限制，做小组作业前要确认权限。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="协作席位">协作席位</button><button type="button" class="point-btn" data-point="共享文件">共享文件</button><button type="button" class="point-btn" data-point="团队空间">团队空间</button></div>
+  </div>
+</article>
+<article class="card" id="card-032" data-section="04 账号权限与安全" data-search="04 账号权限与安全 稳定邮箱 常用工具尽量使用稳定邮箱注册，方便找回账号、接收验证和长期管理文件。 稳定邮箱 账号找回 长期管理">
+  <div class="card-meta"><span class="num">032</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>稳定邮箱</h3>
+  <p>常用工具尽量使用稳定邮箱注册，方便找回账号、接收验证和长期管理文件。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="稳定邮箱">稳定邮箱</button><button type="button" class="point-btn" data-point="账号找回">账号找回</button><button type="button" class="point-btn" data-point="长期管理">长期管理</button></div>
+  </div>
+</article>
+<article class="card" id="card-033" data-section="04 账号权限与安全" data-search="04 账号权限与安全 个人与团队分开 个人草稿、团队文件、客户项目不要混在一起，避免误删、误改和误分享。 个人空间 团队空间 权限边界">
+  <div class="card-meta"><span class="num">033</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>个人与团队分开</h3>
+  <p>个人草稿、团队文件、客户项目不要混在一起，避免误删、误改和误分享。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="个人空间">个人空间</button><button type="button" class="point-btn" data-point="团队空间">团队空间</button><button type="button" class="point-btn" data-point="权限边界">权限边界</button></div>
+  </div>
+</article>
+<article class="card" id="card-034" data-section="04 账号权限与安全" data-search="04 账号权限与安全 API Key 不外泄 API Key、验证码、账号密码不能截图、转发或放到公开文件里。 API Key 账号安全 不要外泄">
+  <div class="card-meta"><span class="num">034</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>API Key 不外泄</h3>
+  <p>API Key、验证码、账号密码不能截图、转发或放到公开文件里。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="API Key">API Key</button><button type="button" class="point-btn" data-point="账号安全">账号安全</button><button type="button" class="point-btn" data-point="不要外泄">不要外泄</button></div>
+  </div>
+</article>
+<article class="card" id="card-035" data-section="04 账号权限与安全" data-search="04 账号权限与安全 隐私资料处理 真实客户资料、个人隐私、敏感数据不要直接丢给 AI，要先脱敏或改成模拟内容。 隐私安全 客户资料 脱敏处理">
+  <div class="card-meta"><span class="num">035</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>隐私资料处理</h3>
+  <p>真实客户资料、个人隐私、敏感数据不要直接丢给 AI，要先脱敏或改成模拟内容。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="隐私安全">隐私安全</button><button type="button" class="point-btn" data-point="客户资料">客户资料</button><button type="button" class="point-btn" data-point="脱敏处理">脱敏处理</button></div>
+  </div>
+</article>
+<article class="card" id="card-036" data-section="04 账号权限与安全" data-search="04 账号权限与安全 慎用未知插件 来源不明的插件、镜像站和安装包可能有安全风险，尽量使用官方入口和可信来源。 插件安全 官方入口 可信来源">
+  <div class="card-meta"><span class="num">036</span><a class="section-pill" href="#sec-04">04 账号权限与安全</a></div>
+  <h3>慎用未知插件</h3>
+  <p>来源不明的插件、镜像站和安装包可能有安全风险，尽量使用官方入口和可信来源。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="插件安全">插件安全</button><button type="button" class="point-btn" data-point="官方入口">官方入口</button><button type="button" class="point-btn" data-point="可信来源">可信来源</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-05">
+  <div class="section-head">
+    <div><span class="section-kicker">05 Figma 环境</span><h2>Figma 环境</h2></div>
+    <p>把 Figma 作为主要工作区，先跑通文件、画布、字体、插件和命名。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-037" data-section="05 Figma 环境" data-search="05 Figma 环境 Figma 是核心工作区 后续 UI 设计、组件整理、原型连接和交付，主要都在 Figma 中完成。 核心工作区 UI 设计 交付">
+  <div class="card-meta"><span class="num">037</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>Figma 是核心工作区</h3>
+  <p>后续 UI 设计、组件整理、原型连接和交付，主要都在 Figma 中完成。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="核心工作区">核心工作区</button><button type="button" class="point-btn" data-point="UI 设计">UI 设计</button><button type="button" class="point-btn" data-point="交付">交付</button></div>
+  </div>
+</article>
+<article class="card" id="card-038" data-section="05 Figma 环境" data-search="05 Figma 环境 桌面端与浏览器端 建议桌面端和浏览器端都能打开文件，避免某一种方式临时不可用。 桌面端 浏览器端 备用方式">
+  <div class="card-meta"><span class="num">038</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>桌面端与浏览器端</h3>
+  <p>建议桌面端和浏览器端都能打开文件，避免某一种方式临时不可用。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="桌面端">桌面端</button><button type="button" class="point-btn" data-point="浏览器端">浏览器端</button><button type="button" class="point-btn" data-point="备用方式">备用方式</button></div>
+  </div>
+</article>
+<article class="card" id="card-039" data-section="05 Figma 环境" data-search="05 Figma 环境 能创建文件 需要确认能创建新文件、打开草稿、进入团队文件，并保存修改。 创建文件 草稿 保存修改">
+  <div class="card-meta"><span class="num">039</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>能创建文件</h3>
+  <p>需要确认能创建新文件、打开草稿、进入团队文件，并保存修改。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="创建文件">创建文件</button><button type="button" class="point-btn" data-point="草稿">草稿</button><button type="button" class="point-btn" data-point="保存修改">保存修改</button></div>
+  </div>
+</article>
+<article class="card" id="card-040" data-section="05 Figma 环境" data-search="05 Figma 环境 认识 Page Page 用来管理不同页面组，例如参考、组件、首页、详情页、导出检查等。 Page 页面分组 文件结构">
+  <div class="card-meta"><span class="num">040</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>认识 Page</h3>
+  <p>Page 用来管理不同页面组，例如参考、组件、首页、详情页、导出检查等。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Page">Page</button><button type="button" class="point-btn" data-point="页面分组">页面分组</button><button type="button" class="point-btn" data-point="文件结构">文件结构</button></div>
+  </div>
+</article>
+<article class="card" id="card-041" data-section="05 Figma 环境" data-search="05 Figma 环境 认识 Frame Frame 是界面设计的实际画布，移动端、网页端、平板端都通过 Frame 管理尺寸。 Frame 画布尺寸 界面容器">
+  <div class="card-meta"><span class="num">041</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>认识 Frame</h3>
+  <p>Frame 是界面设计的实际画布，移动端、网页端、平板端都通过 Frame 管理尺寸。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Frame">Frame</button><button type="button" class="point-btn" data-point="画布尺寸">画布尺寸</button><button type="button" class="point-btn" data-point="界面容器">界面容器</button></div>
+  </div>
+</article>
+<article class="card" id="card-042" data-section="05 Figma 环境" data-search="05 Figma 环境 个人草稿与团队文件 个人草稿适合练习，团队文件适合协作，二者用途不同，使用时不要混淆。 个人草稿 团队文件 协作区别">
+  <div class="card-meta"><span class="num">042</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>个人草稿与团队文件</h3>
+  <p>个人草稿适合练习，团队文件适合协作，二者用途不同，使用时不要混淆。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="个人草稿">个人草稿</button><button type="button" class="point-btn" data-point="团队文件">团队文件</button><button type="button" class="point-btn" data-point="协作区别">协作区别</button></div>
+  </div>
+</article>
+<article class="card" id="card-043" data-section="05 Figma 环境" data-search="05 Figma 环境 字体准备 提前准备常用中文字体和英文字体，保证界面中中英文都能正常显示。 字体准备 中文字体 英文字体">
+  <div class="card-meta"><span class="num">043</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>字体准备</h3>
+  <p>提前准备常用中文字体和英文字体，保证界面中中英文都能正常显示。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="字体准备">字体准备</button><button type="button" class="point-btn" data-point="中文字体">中文字体</button><button type="button" class="point-btn" data-point="英文字体">英文字体</button></div>
+  </div>
+</article>
+<article class="card" id="card-044" data-section="05 Figma 环境" data-search="05 Figma 环境 字体授权意识 学习练习和正式商用项目的字体授权不同，不能默认所有字体都可以商用。 字体授权 学习练习 商用项目">
+  <div class="card-meta"><span class="num">044</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>字体授权意识</h3>
+  <p>学习练习和正式商用项目的字体授权不同，不能默认所有字体都可以商用。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="字体授权">字体授权</button><button type="button" class="point-btn" data-point="学习练习">学习练习</button><button type="button" class="point-btn" data-point="商用项目">商用项目</button></div>
+  </div>
+</article>
+<article class="card" id="card-045" data-section="05 Figma 环境" data-search="05 Figma 环境 插件数量控制 Figma 插件只安装当前会用到的核心插件，避免插件太多导致选择混乱或文件不稳定。 插件控制 核心插件 稳定文件">
+  <div class="card-meta"><span class="num">045</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>插件数量控制</h3>
+  <p>Figma 插件只安装当前会用到的核心插件，避免插件太多导致选择混乱或文件不稳定。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="插件控制">插件控制</button><button type="button" class="point-btn" data-point="核心插件">核心插件</button><button type="button" class="point-btn" data-point="稳定文件">稳定文件</button></div>
+  </div>
+</article>
+<article class="card" id="card-046" data-section="05 Figma 环境" data-search="05 Figma 环境 项目文件结构 建议建立 Course_UI_AI / 04_Environment_Setup 这样的课程练习文件夹。 项目结构 课程文件夹 练习归档">
+  <div class="card-meta"><span class="num">046</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>项目文件结构</h3>
+  <p>建议建立 Course_UI_AI / 04_Environment_Setup 这样的课程练习文件夹。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="项目结构">项目结构</button><button type="button" class="point-btn" data-point="课程文件夹">课程文件夹</button><button type="button" class="point-btn" data-point="练习归档">练习归档</button></div>
+  </div>
+</article>
+<article class="card" id="card-047" data-section="05 Figma 环境" data-search="05 Figma 环境 资源子文件夹 Prompt、参考图、Figma 文件、导出图应分开管理，例如 01_Prompts、02_References、03_Figma、04_Exports。 资源子文件夹 Prompt 导出文件">
+  <div class="card-meta"><span class="num">047</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>资源子文件夹</h3>
+  <p>Prompt、参考图、Figma 文件、导出图应分开管理，例如 01_Prompts、02_References、03_Figma、04_Exports。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="资源子文件夹">资源子文件夹</button><button type="button" class="point-btn" data-point="Prompt">Prompt</button><button type="button" class="point-btn" data-point="导出文件">导出文件</button></div>
+  </div>
+</article>
+<article class="card" id="card-048" data-section="05 Figma 环境" data-search="05 Figma 环境 文件命名示例 文件名建议包含日期、项目、页面和版本，例如 2026-06-23_music-app_home_v01。 文件命名 日期项目页面 版本号">
+  <div class="card-meta"><span class="num">048</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>文件命名示例</h3>
+  <p>文件名建议包含日期、项目、页面和版本，例如 2026-06-23_music-app_home_v01。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="文件命名">文件命名</button><button type="button" class="point-btn" data-point="日期项目页面">日期项目页面</button><button type="button" class="point-btn" data-point="版本号">版本号</button></div>
+  </div>
+</article>
+<article class="card" id="card-049" data-section="05 Figma 环境" data-search="05 Figma 环境 图层命名习惯 进入 Figma 后要养成图层命名习惯，按钮、卡片、导航和内容区不要全部叫 Frame 1。 图层命名 可读性 后续交付">
+  <div class="card-meta"><span class="num">049</span><a class="section-pill" href="#sec-05">05 Figma 环境</a></div>
+  <h3>图层命名习惯</h3>
+  <p>进入 Figma 后要养成图层命名习惯，按钮、卡片、导航和内容区不要全部叫 Frame 1。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="图层命名">图层命名</button><button type="button" class="point-btn" data-point="可读性">可读性</button><button type="button" class="point-btn" data-point="后续交付">后续交付</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-06">
+  <div class="section-head">
+    <div><span class="section-kicker">06 基础资源</span><h2>基础资源</h2></div>
+    <p>准备字体、图标、界面尺寸、视觉素材、品牌色和竞品截图。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-050" data-section="06 基础资源" data-search="06 基础资源 字体资源 字体决定信息气质和阅读体验，设计前应准备基础中文字体和英文字体。 字体资源 阅读体验 信息气质">
+  <div class="card-meta"><span class="num">050</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>字体资源</h3>
+  <p>字体决定信息气质和阅读体验，设计前应准备基础中文字体和英文字体。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="字体资源">字体资源</button><button type="button" class="point-btn" data-point="阅读体验">阅读体验</button><button type="button" class="point-btn" data-point="信息气质">信息气质</button></div>
+  </div>
+</article>
+<article class="card" id="card-051" data-section="06 基础资源" data-search="06 基础资源 中文字体 中文界面要优先保证正文清晰、标题有层次、数字和英文混排不突兀。 中文字体 正文清晰 混排">
+  <div class="card-meta"><span class="num">051</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>中文字体</h3>
+  <p>中文界面要优先保证正文清晰、标题有层次、数字和英文混排不突兀。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="中文字体">中文字体</button><button type="button" class="point-btn" data-point="正文清晰">正文清晰</button><button type="button" class="point-btn" data-point="混排">混排</button></div>
+  </div>
+</article>
+<article class="card" id="card-052" data-section="06 基础资源" data-search="06 基础资源 英文字体 英文标题、数据、按钮和标签会影响页面的现代感与专业感。 英文字体 英文标题 专业感">
+  <div class="card-meta"><span class="num">052</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>英文字体</h3>
+  <p>英文标题、数据、按钮和标签会影响页面的现代感与专业感。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="英文字体">英文字体</button><button type="button" class="point-btn" data-point="英文标题">英文标题</button><button type="button" class="point-btn" data-point="专业感">专业感</button></div>
+  </div>
+</article>
+<article class="card" id="card-053" data-section="06 基础资源" data-search="06 基础资源 字体授权 下载字体前先区分免费商用、个人学习、试用授权和正式商业授权。 免费商用 个人学习 授权差异">
+  <div class="card-meta"><span class="num">053</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>字体授权</h3>
+  <p>下载字体前先区分免费商用、个人学习、试用授权和正式商业授权。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="免费商用">免费商用</button><button type="button" class="point-btn" data-point="个人学习">个人学习</button><button type="button" class="point-btn" data-point="授权差异">授权差异</button></div>
+  </div>
+</article>
+<article class="card" id="card-054" data-section="06 基础资源" data-search="06 基础资源 图标资源 图标尽量选择 SVG 格式，方便在 Figma 中缩放、改色和统一风格。 图标资源 SVG 可编辑">
+  <div class="card-meta"><span class="num">054</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>图标资源</h3>
+  <p>图标尽量选择 SVG 格式，方便在 Figma 中缩放、改色和统一风格。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="图标资源">图标资源</button><button type="button" class="point-btn" data-point="SVG">SVG</button><button type="button" class="point-btn" data-point="可编辑">可编辑</button></div>
+  </div>
+</article>
+<article class="card" id="card-055" data-section="06 基础资源" data-search="06 基础资源 线性图标 线性图标适合轻量、现代、信息密集的界面，但线宽要统一。 线性图标 线宽统一 现代感">
+  <div class="card-meta"><span class="num">055</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>线性图标</h3>
+  <p>线性图标适合轻量、现代、信息密集的界面，但线宽要统一。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="线性图标">线性图标</button><button type="button" class="point-btn" data-point="线宽统一">线宽统一</button><button type="button" class="point-btn" data-point="现代感">现代感</button></div>
+  </div>
+</article>
+<article class="card" id="card-056" data-section="06 基础资源" data-search="06 基础资源 面性图标 面性图标更醒目，适合重点入口、功能分类和需要强化识别的模块。 面性图标 重点入口 功能分类">
+  <div class="card-meta"><span class="num">056</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>面性图标</h3>
+  <p>面性图标更醒目，适合重点入口、功能分类和需要强化识别的模块。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="面性图标">面性图标</button><button type="button" class="point-btn" data-point="重点入口">重点入口</button><button type="button" class="point-btn" data-point="功能分类">功能分类</button></div>
+  </div>
+</article>
+<article class="card" id="card-057" data-section="06 基础资源" data-search="06 基础资源 图标风格一致 同一页面不要混用太多图标风格，否则会让界面显得杂乱。 风格一致 避免混用 界面统一">
+  <div class="card-meta"><span class="num">057</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>图标风格一致</h3>
+  <p>同一页面不要混用太多图标风格，否则会让界面显得杂乱。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="风格一致">风格一致</button><button type="button" class="point-btn" data-point="避免混用">避免混用</button><button type="button" class="point-btn" data-point="界面统一">界面统一</button></div>
+  </div>
+</article>
+<article class="card" id="card-058" data-section="06 基础资源" data-search="06 基础资源 移动端尺寸 移动端练习要了解常见手机画布尺寸，并注意安全区、底部导航和触控区域。 移动端 安全区 触控区域">
+  <div class="card-meta"><span class="num">058</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>移动端尺寸</h3>
+  <p>移动端练习要了解常见手机画布尺寸，并注意安全区、底部导航和触控区域。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="移动端">移动端</button><button type="button" class="point-btn" data-point="安全区">安全区</button><button type="button" class="point-btn" data-point="触控区域">触控区域</button></div>
+  </div>
+</article>
+<article class="card" id="card-059" data-section="06 基础资源" data-search="06 基础资源 网页端尺寸 网页端设计要考虑大屏宽度、内容最大宽度、栅格和响应式变化。 网页端 最大宽度 响应式">
+  <div class="card-meta"><span class="num">059</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>网页端尺寸</h3>
+  <p>网页端设计要考虑大屏宽度、内容最大宽度、栅格和响应式变化。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="网页端">网页端</button><button type="button" class="point-btn" data-point="最大宽度">最大宽度</button><button type="button" class="point-btn" data-point="响应式">响应式</button></div>
+  </div>
+</article>
+<article class="card" id="card-060" data-section="06 基础资源" data-search="06 基础资源 平板端尺寸 平板端常处于移动端和桌面端之间，要注意横竖屏与信息密度。 平板端 横竖屏 信息密度">
+  <div class="card-meta"><span class="num">060</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>平板端尺寸</h3>
+  <p>平板端常处于移动端和桌面端之间，要注意横竖屏与信息密度。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="平板端">平板端</button><button type="button" class="point-btn" data-point="横竖屏">横竖屏</button><button type="button" class="point-btn" data-point="信息密度">信息密度</button></div>
+  </div>
+</article>
+<article class="card" id="card-061" data-section="06 基础资源" data-search="06 基础资源 参考图 参考图用于学习布局、配色、质感和组件处理，不是直接照抄。 参考图 布局学习 不要照抄">
+  <div class="card-meta"><span class="num">061</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>参考图</h3>
+  <p>参考图用于学习布局、配色、质感和组件处理，不是直接照抄。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="参考图">参考图</button><button type="button" class="point-btn" data-point="布局学习">布局学习</button><button type="button" class="point-btn" data-point="不要照抄">不要照抄</button></div>
+  </div>
+</article>
+<article class="card" id="card-062" data-section="06 基础资源" data-search="06 基础资源 Moodboard Moodboard 用来统一视觉方向，把颜色、材质、字体、图形和氛围放在同一页看。 Moodboard 视觉方向 氛围统一">
+  <div class="card-meta"><span class="num">062</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>Moodboard</h3>
+  <p>Moodboard 用来统一视觉方向，把颜色、材质、字体、图形和氛围放在同一页看。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Moodboard">Moodboard</button><button type="button" class="point-btn" data-point="视觉方向">视觉方向</button><button type="button" class="point-btn" data-point="氛围统一">氛围统一</button></div>
+  </div>
+</article>
+<article class="card" id="card-063" data-section="06 基础资源" data-search="06 基础资源 品牌色 品牌色要提早整理，至少包括主色、辅助色、背景色和文字色的初步方向。 品牌色 主色辅助色 颜色方向">
+  <div class="card-meta"><span class="num">063</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>品牌色</h3>
+  <p>品牌色要提早整理，至少包括主色、辅助色、背景色和文字色的初步方向。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="品牌色">品牌色</button><button type="button" class="point-btn" data-point="主色辅助色">主色辅助色</button><button type="button" class="point-btn" data-point="颜色方向">颜色方向</button></div>
+  </div>
+</article>
+<article class="card" id="card-064" data-section="06 基础资源" data-search="06 基础资源 竞品截图 竞品截图用于观察信息结构、交互逻辑和常见组件，而不只是看好不好看。 竞品截图 信息结构 交互逻辑">
+  <div class="card-meta"><span class="num">064</span><a class="section-pill" href="#sec-06">06 基础资源</a></div>
+  <h3>竞品截图</h3>
+  <p>竞品截图用于观察信息结构、交互逻辑和常见组件，而不只是看好不好看。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="竞品截图">竞品截图</button><button type="button" class="point-btn" data-point="信息结构">信息结构</button><button type="button" class="point-btn" data-point="交互逻辑">交互逻辑</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-07">
+  <div class="section-head">
+    <div><span class="section-kicker">07 资源创建流程</span><h2>资源创建流程</h2></div>
+    <p>把临时下载的素材变成可复用、可追踪、可复盘的项目资产。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-065" data-section="07 资源创建流程" data-search="07 资源创建流程 先确定项目方向 收集素材前先写清项目类型、目标用户、使用场景、风格关键词和核心内容。 项目方向 目标用户 风格关键词">
+  <div class="card-meta"><span class="num">065</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>先确定项目方向</h3>
+  <p>收集素材前先写清项目类型、目标用户、使用场景、风格关键词和核心内容。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="项目方向">项目方向</button><button type="button" class="point-btn" data-point="目标用户">目标用户</button><button type="button" class="point-btn" data-point="风格关键词">风格关键词</button></div>
+  </div>
+</article>
+<article class="card" id="card-066" data-section="07 资源创建流程" data-search="07 资源创建流程 明确页面类型 音乐 App 首页、电商详情页、作品集网站等页面类型不同，需要的素材也不同。 页面类型 音乐 App 电商详情页">
+  <div class="card-meta"><span class="num">066</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>明确页面类型</h3>
+  <p>音乐 App 首页、电商详情页、作品集网站等页面类型不同，需要的素材也不同。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="页面类型">页面类型</button><button type="button" class="point-btn" data-point="音乐 App">音乐 App</button><button type="button" class="point-btn" data-point="电商详情页">电商详情页</button></div>
+  </div>
+</article>
+<article class="card" id="card-067" data-section="07 资源创建流程" data-search="07 资源创建流程 明确目标用户 年轻用户、白领人群、招聘方等目标用户不同，视觉风格和信息重点也会变化。 目标用户 人群差异 信息重点">
+  <div class="card-meta"><span class="num">067</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>明确目标用户</h3>
+  <p>年轻用户、白领人群、招聘方等目标用户不同，视觉风格和信息重点也会变化。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="目标用户">目标用户</button><button type="button" class="point-btn" data-point="人群差异">人群差异</button><button type="button" class="point-btn" data-point="信息重点">信息重点</button></div>
+  </div>
+</article>
+<article class="card" id="card-068" data-section="07 资源创建流程" data-search="07 资源创建流程 明确使用场景 通勤、购物、学习、求职、会议展示等场景，会影响页面结构和内容优先级。 使用场景 内容优先级 页面结构">
+  <div class="card-meta"><span class="num">068</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>明确使用场景</h3>
+  <p>通勤、购物、学习、求职、会议展示等场景，会影响页面结构和内容优先级。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="使用场景">使用场景</button><button type="button" class="point-btn" data-point="内容优先级">内容优先级</button><button type="button" class="point-btn" data-point="页面结构">页面结构</button></div>
+  </div>
+</article>
+<article class="card" id="card-069" data-section="07 资源创建流程" data-search="07 资源创建流程 明确视觉关键词 简洁现代、柔和治愈、科技感、高级极简等关键词要尽量具体，避免空泛。 视觉关键词 风格方向 避免空泛">
+  <div class="card-meta"><span class="num">069</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>明确视觉关键词</h3>
+  <p>简洁现代、柔和治愈、科技感、高级极简等关键词要尽量具体，避免空泛。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="视觉关键词">视觉关键词</button><button type="button" class="point-btn" data-point="风格方向">风格方向</button><button type="button" class="point-btn" data-point="避免空泛">避免空泛</button></div>
+  </div>
+</article>
+<article class="card" id="card-070" data-section="07 资源创建流程" data-search="07 资源创建流程 收集参考资源 围绕同一风格方向收集字体、图标、配色、竞品截图、Moodboard 和素材图。 收集资源 同一风格 素材图">
+  <div class="card-meta"><span class="num">070</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>收集参考资源</h3>
+  <p>围绕同一风格方向收集字体、图标、配色、竞品截图、Moodboard 和素材图。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="收集资源">收集资源</button><button type="button" class="point-btn" data-point="同一风格">同一风格</button><button type="button" class="point-btn" data-point="素材图">素材图</button></div>
+  </div>
+</article>
+<article class="card" id="card-071" data-section="07 资源创建流程" data-search="07 资源创建流程 筛选可用内容 删掉风格不一致、质量不稳定、授权不清晰、尺寸太低或后续难编辑的素材。 筛选素材 质量稳定 授权清晰">
+  <div class="card-meta"><span class="num">071</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>筛选可用内容</h3>
+  <p>删掉风格不一致、质量不稳定、授权不清晰、尺寸太低或后续难编辑的素材。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="筛选素材">筛选素材</button><button type="button" class="point-btn" data-point="质量稳定">质量稳定</button><button type="button" class="point-btn" data-point="授权清晰">授权清晰</button></div>
+  </div>
+</article>
+<article class="card" id="card-072" data-section="07 资源创建流程" data-search="07 资源创建流程 不要资源过载 素材不是越多越好，太多参考反而会让设计方向变散。 资源过载 方向变散 控制数量">
+  <div class="card-meta"><span class="num">072</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>不要资源过载</h3>
+  <p>素材不是越多越好，太多参考反而会让设计方向变散。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="资源过载">资源过载</button><button type="button" class="point-btn" data-point="方向变散">方向变散</button><button type="button" class="point-btn" data-point="控制数量">控制数量</button></div>
+  </div>
+</article>
+<article class="card" id="card-073" data-section="07 资源创建流程" data-search="07 资源创建流程 统一命名归档 按照类型、用途、项目名和版本号命名，保证后续能搜索、替换和复盘。 统一命名 项目名 版本号">
+  <div class="card-meta"><span class="num">073</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>统一命名归档</h3>
+  <p>按照类型、用途、项目名和版本号命名，保证后续能搜索、替换和复盘。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="统一命名">统一命名</button><button type="button" class="point-btn" data-point="项目名">项目名</button><button type="button" class="point-btn" data-point="版本号">版本号</button></div>
+  </div>
+</article>
+<article class="card" id="card-074" data-section="07 资源创建流程" data-search="07 资源创建流程 推荐文件夹结构 每个项目单独建文件夹：00_Brief、01_Prompts、02_References、03_Assets、04_Figma、05_Exports、06_Review。 文件夹结构 Brief Review">
+  <div class="card-meta"><span class="num">074</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>推荐文件夹结构</h3>
+  <p>每个项目单独建文件夹：00_Brief、01_Prompts、02_References、03_Assets、04_Figma、05_Exports、06_Review。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="文件夹结构">文件夹结构</button><button type="button" class="point-btn" data-point="Brief">Brief</button><button type="button" class="point-btn" data-point="Review">Review</button></div>
+  </div>
+</article>
+<article class="card" id="card-075" data-section="07 资源创建流程" data-search="07 资源创建流程 AI 输出要留 Prompt 所有 AI 生成图都要保留对应 Prompt，方便二次生成、修改风格和复盘过程。 保留 Prompt 二次生成 复盘">
+  <div class="card-meta"><span class="num">075</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>AI 输出要留 Prompt</h3>
+  <p>所有 AI 生成图都要保留对应 Prompt，方便二次生成、修改风格和复盘过程。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="保留 Prompt">保留 Prompt</button><button type="button" class="point-btn" data-point="二次生成">二次生成</button><button type="button" class="point-btn" data-point="复盘">复盘</button></div>
+  </div>
+</article>
+<article class="card" id="card-076" data-section="07 资源创建流程" data-search="07 资源创建流程 进入 Figma 前检查 素材导入 Figma 前先检查格式、清晰度、授权、命名和是否可编辑。 导入前检查 格式清晰度 可编辑">
+  <div class="card-meta"><span class="num">076</span><a class="section-pill" href="#sec-07">07 资源创建流程</a></div>
+  <h3>进入 Figma 前检查</h3>
+  <p>素材导入 Figma 前先检查格式、清晰度、授权、命名和是否可编辑。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="导入前检查">导入前检查</button><button type="button" class="point-btn" data-point="格式清晰度">格式清晰度</button><button type="button" class="point-btn" data-point="可编辑">可编辑</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-08">
+  <div class="section-head">
+    <div><span class="section-kicker">08 UI 基础规范</span><h2>UI 基础规范</h2></div>
+    <p>画页面前先统一颜色、字体、间距、圆角、阴影和组件状态。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-077" data-section="08 UI 基础规范" data-search="08 UI 基础规范 先生成 UI 规范 正式画页面前先生成基础 UI 规范，让颜色、字体、间距、圆角和组件状态保持一致。 UI 规范 画前准备 保持一致">
+  <div class="card-meta"><span class="num">077</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>先生成 UI 规范</h3>
+  <p>正式画页面前先生成基础 UI 规范，让颜色、字体、间距、圆角和组件状态保持一致。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="UI 规范">UI 规范</button><button type="button" class="point-btn" data-point="画前准备">画前准备</button><button type="button" class="point-btn" data-point="保持一致">保持一致</button></div>
+  </div>
+</article>
+<article class="card" id="card-078" data-section="08 UI 基础规范" data-search="08 UI 基础规范 规范不是装饰 UI 规范的作用是减少随机发挥，让每个模块看起来属于同一个系统。 不是装饰 减少随机 系统感">
+  <div class="card-meta"><span class="num">078</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>规范不是装饰</h3>
+  <p>UI 规范的作用是减少随机发挥，让每个模块看起来属于同一个系统。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="不是装饰">不是装饰</button><button type="button" class="point-btn" data-point="减少随机">减少随机</button><button type="button" class="point-btn" data-point="系统感">系统感</button></div>
+  </div>
+</article>
+<article class="card" id="card-079" data-section="08 UI 基础规范" data-search="08 UI 基础规范 Prompt 模板入口 可以让 AI 根据项目类型、目标用户和风格关键词生成一份可放进 Figma 执行的 UI 基础规范。 Prompt 模板 项目类型 可执行">
+  <div class="card-meta"><span class="num">079</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>Prompt 模板入口</h3>
+  <p>可以让 AI 根据项目类型、目标用户和风格关键词生成一份可放进 Figma 执行的 UI 基础规范。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Prompt 模板">Prompt 模板</button><button type="button" class="point-btn" data-point="项目类型">项目类型</button><button type="button" class="point-btn" data-point="可执行">可执行</button></div>
+  </div>
+</article>
+<article class="card" id="card-080" data-section="08 UI 基础规范" data-search="08 UI 基础规范 项目类型变量 模板中要替换项目类型，例如音乐 App 首页、电商详情页、个人作品集网站。 项目类型 变量替换 页面目标">
+  <div class="card-meta"><span class="num">080</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>项目类型变量</h3>
+  <p>模板中要替换项目类型，例如音乐 App 首页、电商详情页、个人作品集网站。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="项目类型">项目类型</button><button type="button" class="point-btn" data-point="变量替换">变量替换</button><button type="button" class="point-btn" data-point="页面目标">页面目标</button></div>
+  </div>
+</article>
+<article class="card" id="card-081" data-section="08 UI 基础规范" data-search="08 UI 基础规范 用户人群变量 模板中要替换目标用户，例如年轻用户、白领人群、设计招聘方。 用户人群 目标用户 设计对象">
+  <div class="card-meta"><span class="num">081</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>用户人群变量</h3>
+  <p>模板中要替换目标用户，例如年轻用户、白领人群、设计招聘方。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="用户人群">用户人群</button><button type="button" class="point-btn" data-point="目标用户">目标用户</button><button type="button" class="point-btn" data-point="设计对象">设计对象</button></div>
+  </div>
+</article>
+<article class="card" id="card-082" data-section="08 UI 基础规范" data-search="08 UI 基础规范 风格关键词变量 模板中要替换风格关键词，例如简洁现代、柔和治愈、科技感、高级极简。 风格关键词 视觉方向 关键词替换">
+  <div class="card-meta"><span class="num">082</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>风格关键词变量</h3>
+  <p>模板中要替换风格关键词，例如简洁现代、柔和治愈、科技感、高级极简。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="风格关键词">风格关键词</button><button type="button" class="point-btn" data-point="视觉方向">视觉方向</button><button type="button" class="point-btn" data-point="关键词替换">关键词替换</button></div>
+  </div>
+</article>
+<article class="card" id="card-083" data-section="08 UI 基础规范" data-search="08 UI 基础规范 颜色系统 颜色系统至少包括主色、辅助色、背景色、边框色、文字色和状态色。 颜色系统 主色 状态色">
+  <div class="card-meta"><span class="num">083</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>颜色系统</h3>
+  <p>颜色系统至少包括主色、辅助色、背景色、边框色、文字色和状态色。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="颜色系统">颜色系统</button><button type="button" class="point-btn" data-point="主色">主色</button><button type="button" class="point-btn" data-point="状态色">状态色</button></div>
+  </div>
+</article>
+<article class="card" id="card-084" data-section="08 UI 基础规范" data-search="08 UI 基础规范 颜色数量控制 颜色不是越多越丰富。主色、辅助色、背景色和文字色要清楚，避免彩虹式堆叠。 颜色数量 主次清楚 避免堆叠">
+  <div class="card-meta"><span class="num">084</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>颜色数量控制</h3>
+  <p>颜色不是越多越丰富。主色、辅助色、背景色和文字色要清楚，避免彩虹式堆叠。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="颜色数量">颜色数量</button><button type="button" class="point-btn" data-point="主次清楚">主次清楚</button><button type="button" class="point-btn" data-point="避免堆叠">避免堆叠</button></div>
+  </div>
+</article>
+<article class="card" id="card-085" data-section="08 UI 基础规范" data-search="08 UI 基础规范 字体层级 字体层级要覆盖页面标题、模块标题、正文、说明文字和按钮文字。 字体层级 标题正文 按钮文字">
+  <div class="card-meta"><span class="num">085</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>字体层级</h3>
+  <p>字体层级要覆盖页面标题、模块标题、正文、说明文字和按钮文字。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="字体层级">字体层级</button><button type="button" class="point-btn" data-point="标题正文">标题正文</button><button type="button" class="point-btn" data-point="按钮文字">按钮文字</button></div>
+  </div>
+</article>
+<article class="card" id="card-086" data-section="08 UI 基础规范" data-search="08 UI 基础规范 字号行高字重 字体规范不只写字号，还要包含字重、行高和适用位置。 字号 行高 字重">
+  <div class="card-meta"><span class="num">086</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>字号行高字重</h3>
+  <p>字体规范不只写字号，还要包含字重、行高和适用位置。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="字号">字号</button><button type="button" class="point-btn" data-point="行高">行高</button><button type="button" class="point-btn" data-point="字重">字重</button></div>
+  </div>
+</article>
+<article class="card" id="card-087" data-section="08 UI 基础规范" data-search="08 UI 基础规范 间距系统 间距建议使用 4 或 8 的倍数，让卡片、列表、按钮和页面留白保持统一节奏。 间距系统 4 的倍数 8 的倍数">
+  <div class="card-meta"><span class="num">087</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>间距系统</h3>
+  <p>间距建议使用 4 或 8 的倍数，让卡片、列表、按钮和页面留白保持统一节奏。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="间距系统">间距系统</button><button type="button" class="point-btn" data-point="4 的倍数">4 的倍数</button><button type="button" class="point-btn" data-point="8 的倍数">8 的倍数</button></div>
+  </div>
+</article>
+<article class="card" id="card-088" data-section="08 UI 基础规范" data-search="08 UI 基础规范 圆角规则 圆角要有统一数值，例如按钮、卡片、输入框分别使用固定圆角，不要每处随意设置。 圆角规则 统一数值 组件一致">
+  <div class="card-meta"><span class="num">088</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>圆角规则</h3>
+  <p>圆角要有统一数值，例如按钮、卡片、输入框分别使用固定圆角，不要每处随意设置。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="圆角规则">圆角规则</button><button type="button" class="point-btn" data-point="统一数值">统一数值</button><button type="button" class="point-btn" data-point="组件一致">组件一致</button></div>
+  </div>
+</article>
+<article class="card" id="card-089" data-section="08 UI 基础规范" data-search="08 UI 基础规范 阴影规则 阴影要服务层级，不要为了好看随意叠加；卡片、浮层和按钮的阴影应有区分。 阴影规则 层级 浮层">
+  <div class="card-meta"><span class="num">089</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>阴影规则</h3>
+  <p>阴影要服务层级，不要为了好看随意叠加；卡片、浮层和按钮的阴影应有区分。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="阴影规则">阴影规则</button><button type="button" class="point-btn" data-point="层级">层级</button><button type="button" class="point-btn" data-point="浮层">浮层</button></div>
+  </div>
+</article>
+<article class="card" id="card-090" data-section="08 UI 基础规范" data-search="08 UI 基础规范 按钮规范 按钮至少要定义默认、悬停、选中、禁用等基础状态，并明确文字和图标规则。 按钮规范 默认状态 禁用状态">
+  <div class="card-meta"><span class="num">090</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>按钮规范</h3>
+  <p>按钮至少要定义默认、悬停、选中、禁用等基础状态，并明确文字和图标规则。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="按钮规范">按钮规范</button><button type="button" class="point-btn" data-point="默认状态">默认状态</button><button type="button" class="point-btn" data-point="禁用状态">禁用状态</button></div>
+  </div>
+</article>
+<article class="card" id="card-091" data-section="08 UI 基础规范" data-search="08 UI 基础规范 卡片规范 卡片要定义背景、边框、圆角、阴影、内边距、标题和内容间距。 卡片规范 内边距 内容间距">
+  <div class="card-meta"><span class="num">091</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>卡片规范</h3>
+  <p>卡片要定义背景、边框、圆角、阴影、内边距、标题和内容间距。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="卡片规范">卡片规范</button><button type="button" class="point-btn" data-point="内边距">内边距</button><button type="button" class="point-btn" data-point="内容间距">内容间距</button></div>
+  </div>
+</article>
+<article class="card" id="card-092" data-section="08 UI 基础规范" data-search="08 UI 基础规范 输入框与标签 输入框、标签、导航栏等组件也要有基础样式，避免页面越做越散。 输入框 标签 导航栏">
+  <div class="card-meta"><span class="num">092</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>输入框与标签</h3>
+  <p>输入框、标签、导航栏等组件也要有基础样式，避免页面越做越散。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="输入框">输入框</button><button type="button" class="point-btn" data-point="标签">标签</button><button type="button" class="point-btn" data-point="导航栏">导航栏</button></div>
+  </div>
+</article>
+<article class="card" id="card-093" data-section="08 UI 基础规范" data-search="08 UI 基础规范 生成后要二次筛选 AI 生成的规范不是最终答案，要根据项目内容删减、合并和修正。 二次筛选 删减合并 人工判断">
+  <div class="card-meta"><span class="num">093</span><a class="section-pill" href="#sec-08">08 UI 基础规范</a></div>
+  <h3>生成后要二次筛选</h3>
+  <p>AI 生成的规范不是最终答案，要根据项目内容删减、合并和修正。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="二次筛选">二次筛选</button><button type="button" class="point-btn" data-point="删减合并">删减合并</button><button type="button" class="point-btn" data-point="人工判断">人工判断</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-09">
+  <div class="section-head">
+    <div><span class="section-kicker">09 最短执行流程</span><h2>最短执行流程</h2></div>
+    <p>先跑通从 Prompt 到 AI 输出，再到 Figma 初稿的最小闭环。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-094" data-section="09 最短执行流程" data-search="09 最短执行流程 跑通最短路径 先不追求作品完成度，重点是确认需求、AI 输出、素材保存、Figma 编辑和文件管理能形成闭环。 最短路径 先跑通 闭环">
+  <div class="card-meta"><span class="num">094</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>跑通最短路径</h3>
+  <p>先不追求作品完成度，重点是确认需求、AI 输出、素材保存、Figma 编辑和文件管理能形成闭环。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="最短路径">最短路径</button><button type="button" class="point-btn" data-point="先跑通">先跑通</button><button type="button" class="point-btn" data-point="闭环">闭环</button></div>
+  </div>
+</article>
+<article class="card" id="card-095" data-section="09 最短执行流程" data-search="09 最短执行流程 写清页面类型 Prompt 中先写清要做的是 App 首页、网页首页、详情页、数据大屏还是作品集页面。 页面类型 Prompt 信息 设计范围">
+  <div class="card-meta"><span class="num">095</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>写清页面类型</h3>
+  <p>Prompt 中先写清要做的是 App 首页、网页首页、详情页、数据大屏还是作品集页面。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="页面类型">页面类型</button><button type="button" class="point-btn" data-point="Prompt 信息">Prompt 信息</button><button type="button" class="point-btn" data-point="设计范围">设计范围</button></div>
+  </div>
+</article>
+<article class="card" id="card-096" data-section="09 最短执行流程" data-search="09 最短执行流程 写清用户场景 补充用户在什么场景下使用页面，能帮助 AI 和设计师判断信息优先级。 用户场景 信息优先级 使用情境">
+  <div class="card-meta"><span class="num">096</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>写清用户场景</h3>
+  <p>补充用户在什么场景下使用页面，能帮助 AI 和设计师判断信息优先级。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="用户场景">用户场景</button><button type="button" class="point-btn" data-point="信息优先级">信息优先级</button><button type="button" class="point-btn" data-point="使用情境">使用情境</button></div>
+  </div>
+</article>
+<article class="card" id="card-097" data-section="09 最短执行流程" data-search="09 最短执行流程 写清风格关键词 风格关键词要具体到视觉感受，例如科技感、柔和治愈、高级极简、蓝色数字大屏。 风格关键词 视觉感受 具体描述">
+  <div class="card-meta"><span class="num">097</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>写清风格关键词</h3>
+  <p>风格关键词要具体到视觉感受，例如科技感、柔和治愈、高级极简、蓝色数字大屏。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="风格关键词">风格关键词</button><button type="button" class="point-btn" data-point="视觉感受">视觉感受</button><button type="button" class="point-btn" data-point="具体描述">具体描述</button></div>
+  </div>
+</article>
+<article class="card" id="card-098" data-section="09 最短执行流程" data-search="09 最短执行流程 写清尺寸 不同尺寸会影响布局，生成前要说明移动端、网页端、横屏大屏或 16:9 展示。 尺寸 移动端 16:9">
+  <div class="card-meta"><span class="num">098</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>写清尺寸</h3>
+  <p>不同尺寸会影响布局，生成前要说明移动端、网页端、横屏大屏或 16:9 展示。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="尺寸">尺寸</button><button type="button" class="point-btn" data-point="移动端">移动端</button><button type="button" class="point-btn" data-point="16:9">16:9</button></div>
+  </div>
+</article>
+<article class="card" id="card-099" data-section="09 最短执行流程" data-search="09 最短执行流程 写清不要出现的元素 Prompt 中可以明确不要出现的内容，例如不要过多装饰、不要低清、不要复杂背景。 负面要求 不要出现 控制结果">
+  <div class="card-meta"><span class="num">099</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>写清不要出现的元素</h3>
+  <p>Prompt 中可以明确不要出现的内容，例如不要过多装饰、不要低清、不要复杂背景。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="负面要求">负面要求</button><button type="button" class="point-btn" data-point="不要出现">不要出现</button><button type="button" class="point-btn" data-point="控制结果">控制结果</button></div>
+  </div>
+</article>
+<article class="card" id="card-100" data-section="09 最短执行流程" data-search="09 最短执行流程 生成视觉方向 用 AI 快速产出视觉方向、参考图或页面草图，用来判断风格是否可继续。 视觉方向 页面草图 风格判断">
+  <div class="card-meta"><span class="num">100</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>生成视觉方向</h3>
+  <p>用 AI 快速产出视觉方向、参考图或页面草图，用来判断风格是否可继续。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="视觉方向">视觉方向</button><button type="button" class="point-btn" data-point="页面草图">页面草图</button><button type="button" class="point-btn" data-point="风格判断">风格判断</button></div>
+  </div>
+</article>
+<article class="card" id="card-101" data-section="09 最短执行流程" data-search="09 最短执行流程 保存 Prompt 与结果 每次生成都保存 Prompt、结果图和版本号，方便复盘为什么这个方向有效或无效。 保存 Prompt 结果图 版本号">
+  <div class="card-meta"><span class="num">101</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>保存 Prompt 与结果</h3>
+  <p>每次生成都保存 Prompt、结果图和版本号，方便复盘为什么这个方向有效或无效。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="保存 Prompt">保存 Prompt</button><button type="button" class="point-btn" data-point="结果图">结果图</button><button type="button" class="point-btn" data-point="版本号">版本号</button></div>
+  </div>
+</article>
+<article class="card" id="card-102" data-section="09 最短执行流程" data-search="09 最短执行流程 进入 Figma 整理 把可用素材带入 Figma，整理 Frame、页面、图层命名和基础组件。 进入 Figma 整理素材 基础组件">
+  <div class="card-meta"><span class="num">102</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>进入 Figma 整理</h3>
+  <p>把可用素材带入 Figma，整理 Frame、页面、图层命名和基础组件。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="进入 Figma">进入 Figma</button><button type="button" class="point-btn" data-point="整理素材">整理素材</button><button type="button" class="point-btn" data-point="基础组件">基础组件</button></div>
+  </div>
+</article>
+<article class="card" id="card-103" data-section="09 最短执行流程" data-search="09 最短执行流程 形成初稿闭环 完成第一个初稿后，不急着美化，先检查结构、资源、命名和导出流程是否通顺。 初稿闭环 结构检查 导出流程">
+  <div class="card-meta"><span class="num">103</span><a class="section-pill" href="#sec-09">09 最短执行流程</a></div>
+  <h3>形成初稿闭环</h3>
+  <p>完成第一个初稿后，不急着美化，先检查结构、资源、命名和导出流程是否通顺。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="初稿闭环">初稿闭环</button><button type="button" class="point-btn" data-point="结构检查">结构检查</button><button type="button" class="point-btn" data-point="导出流程">导出流程</button></div>
+  </div>
+</article></div>
+</section>
+<section class="section-block" id="sec-10">
+  <div class="section-head">
+    <div><span class="section-kicker">10 准备清单</span><h2>准备清单</h2></div>
+    <p>用最后的检查清单确认是否具备进入实操的条件。</p>
+  </div>
+  <div class="cards-grid"><article class="card" id="card-104" data-section="10 准备清单" data-search="10 准备清单 账号已登录 GPT、Gemini、Figma 等常用工具能正常打开，账号不会在使用过程中卡住。 账号登录 常用工具 使用检查">
+  <div class="card-meta"><span class="num">104</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>账号已登录</h3>
+  <p>GPT、Gemini、Figma 等常用工具能正常打开，账号不会在使用过程中卡住。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="账号登录">账号登录</button><button type="button" class="point-btn" data-point="常用工具">常用工具</button><button type="button" class="point-btn" data-point="使用检查">使用检查</button></div>
+  </div>
+</article>
+<article class="card" id="card-105" data-section="10 准备清单" data-search="10 准备清单 Figma 可编辑 能创建文件、创建 Frame、导入素材、命名图层并保存修改。 Figma 可编辑 创建 Frame 导入素材">
+  <div class="card-meta"><span class="num">105</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>Figma 可编辑</h3>
+  <p>能创建文件、创建 Frame、导入素材、命名图层并保存修改。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="Figma 可编辑">Figma 可编辑</button><button type="button" class="point-btn" data-point="创建 Frame">创建 Frame</button><button type="button" class="point-btn" data-point="导入素材">导入素材</button></div>
+  </div>
+</article>
+<article class="card" id="card-106" data-section="10 准备清单" data-search="10 准备清单 插件已控制 只保留当前练习相关核心插件，来源可靠、用途清晰。 插件控制 来源可靠 用途清晰">
+  <div class="card-meta"><span class="num">106</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>插件已控制</h3>
+  <p>只保留当前练习相关核心插件，来源可靠、用途清晰。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="插件控制">插件控制</button><button type="button" class="point-btn" data-point="来源可靠">来源可靠</button><button type="button" class="point-btn" data-point="用途清晰">用途清晰</button></div>
+  </div>
+</article>
+<article class="card" id="card-107" data-section="10 准备清单" data-search="10 准备清单 资源已归档 字体、图标、参考图、Prompt、AI 输出图和导出文件都有统一位置。 资源归档 AI 输出图 统一位置">
+  <div class="card-meta"><span class="num">107</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>资源已归档</h3>
+  <p>字体、图标、参考图、Prompt、AI 输出图和导出文件都有统一位置。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="资源归档">资源归档</button><button type="button" class="point-btn" data-point="AI 输出图">AI 输出图</button><button type="button" class="point-btn" data-point="统一位置">统一位置</button></div>
+  </div>
+</article>
+<article class="card" id="card-108" data-section="10 准备清单" data-search="10 准备清单 命名已统一 文件名能看出日期、主题、页面、用途和版本，方便后续复盘。 命名统一 日期主题 版本复盘">
+  <div class="card-meta"><span class="num">108</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>命名已统一</h3>
+  <p>文件名能看出日期、主题、页面、用途和版本，方便后续复盘。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="命名统一">命名统一</button><button type="button" class="point-btn" data-point="日期主题">日期主题</button><button type="button" class="point-btn" data-point="版本复盘">版本复盘</button></div>
+  </div>
+</article>
+<article class="card" id="card-109" data-section="10 准备清单" data-search="10 准备清单 安全边界已确认 账号密码、验证码、API Key、真实客户资料和隐私内容不会随意共享。 安全边界 隐私内容 不随意共享">
+  <div class="card-meta"><span class="num">109</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>安全边界已确认</h3>
+  <p>账号密码、验证码、API Key、真实客户资料和隐私内容不会随意共享。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="安全边界">安全边界</button><button type="button" class="point-btn" data-point="隐私内容">隐私内容</button><button type="button" class="point-btn" data-point="不随意共享">不随意共享</button></div>
+  </div>
+</article>
+<article class="card" id="card-110" data-section="10 准备清单" data-search="10 准备清单 完成自查方式 对照清单逐项检查，不只停留在概念理解。能操作，才算完成准备。 完成自查 逐项检查 能操作">
+  <div class="card-meta"><span class="num">110</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>完成自查方式</h3>
+  <p>对照清单逐项检查，不只停留在概念理解。能操作，才算完成准备。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="完成自查">完成自查</button><button type="button" class="point-btn" data-point="逐项检查">逐项检查</button><button type="button" class="point-btn" data-point="能操作">能操作</button></div>
+  </div>
+</article>
+<article class="card" id="card-111" data-section="10 准备清单" data-search="10 准备清单 展示检查方式 可现场打开 Figma 文件夹、素材目录和命名示例，确认准备是否真实完成。 现场检查 现场查看 真实完成">
+  <div class="card-meta"><span class="num">111</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>展示检查方式</h3>
+  <p>可现场打开 Figma 文件夹、素材目录和命名示例，确认准备是否真实完成。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="现场检查">现场检查</button><button type="button" class="point-btn" data-point="现场查看">现场查看</button><button type="button" class="point-btn" data-point="真实完成">真实完成</button></div>
+  </div>
+</article>
+<article class="card" id="card-112" data-section="10 准备清单" data-search="10 准备清单 进入实操条件 当工具、权限、资源、规范和文件结构都准备好，就可以进入正式 UI 设计练习。 进入实操 准备完成 UI 练习">
+  <div class="card-meta"><span class="num">112</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>进入实操条件</h3>
+  <p>当工具、权限、资源、规范和文件结构都准备好，就可以进入正式 UI 设计练习。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="进入实操">进入实操</button><button type="button" class="point-btn" data-point="准备完成">准备完成</button><button type="button" class="point-btn" data-point="UI 练习">UI 练习</button></div>
+  </div>
+</article>
+<article class="card" id="card-113" data-section="10 准备清单" data-search="10 准备清单 结尾总结 工具环境越稳定，设计迭代越自由。把准备工作做扎实，后续每一次练习都会更快进入创作状态。 结尾总结 设计迭代 创作状态">
+  <div class="card-meta"><span class="num">113</span><a class="section-pill" href="#sec-10">10 准备清单</a></div>
+  <h3>结尾总结</h3>
+  <p>工具环境越稳定，设计迭代越自由。把准备工作做扎实，后续每一次练习都会更快进入创作状态。</p>
+  <div class="points-wrap">
+    <div class="points-title">关键词定位</div>
+    <div class="points"><button type="button" class="point-btn" data-point="结尾总结">结尾总结</button><button type="button" class="point-btn" data-point="设计迭代">设计迭代</button><button type="button" class="point-btn" data-point="创作状态">创作状态</button></div>
+  </div>
+</article></div>
+</section>
+  </main>
+</div>
+<div id="toast" class="toast">已复制</div>
+<script>
+(function() {
+  const searchInput = document.getElementById('searchInput');
+  const resetBtn = document.getElementById('resetBtn');
+  const printBtn = document.getElementById('printBtn');
+  const copyAllBtn = document.getElementById('copyAllBtn');
+  const cards = Array.from(document.querySelectorAll('.section-block:not(#sec-01) .card'));
+  const sections = Array.from(document.querySelectorAll('.section-block:not(#sec-01)'));
+  const statusText = document.getElementById('statusText');
+  const emptyState = document.getElementById('emptyState');
+  const toast = document.getElementById('toast');
+  const total = cards.length;
+
+  function normalize(text) { return (text || '').toLowerCase().replace(/\s+/g, ''); }
+  function showToast(text) {
+    toast.textContent = text || '已复制';
+    toast.classList.add('show');
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 1100);
+  }
+  function applyFilter() {
+    const q = normalize(searchInput.value);
+    let shown = 0;
+    cards.forEach(card => {
+      const ok = !q || normalize(card.dataset.search).includes(q);
+      card.classList.toggle('is-hidden', !ok);
+      if (ok) shown += 1;
+    });
+    sections.forEach(section => {
+      const visibleCards = section.querySelectorAll('.card:not(.is-hidden)').length;
+      section.style.display = visibleCards ? '' : 'none';
+    });
+    statusText.innerHTML = '显示 <b>' + shown + '</b> / ' + total + ' 张卡片';
+    emptyState.style.display = shown ? 'none' : 'block';
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => showToast('已复制'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      showToast('已复制');
+    }
+  }
+
+  searchInput.addEventListener('input', applyFilter);
+  resetBtn.addEventListener('click', () => { searchInput.value = ''; applyFilter(); window.scrollTo({top: 0, behavior: 'smooth'}); });
+  printBtn.addEventListener('click', () => window.print());
+  copyAllBtn.addEventListener('click', () => {
+    const text = cards.map(card => {
+      const num = card.querySelector('.num').textContent.trim();
+      const title = card.querySelector('h3').textContent.trim();
+      const body = card.querySelector('p').textContent.trim();
+      const points = Array.from(card.querySelectorAll('.point-btn')).map(btn => btn.textContent.trim()).join(' / ');
+      return num + '. ' + title + '\n' + body + '\n关键词：' + points;
+    }).join('\n\n');
+    copyText(text);
+  });
+  document.querySelectorAll('.point-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      searchInput.value = btn.dataset.point;
+      applyFilter();
+      const first = document.querySelector('.card:not(.is-hidden)');
+      if (first) first.scrollIntoView({behavior: 'smooth', block: 'center'});
+      showToast('已按关键词定位');
+    });
+    btn.addEventListener('dblclick', () => copyText(btn.dataset.point));
+  });
+  applyFilter();
+})();
+</script>
+</body>
+</html>
