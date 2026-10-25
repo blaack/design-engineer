@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT 生成网页 UI｜设计要点卡片</title>
+  <style>
+
+    :root {
+      --bg: #f7f9fd;
+      --ink: #17233c;
+      --muted: #65738d;
+      --line: #dbe5f2;
+      --blue: #2f67df;
+      --shadow: 0 7px 20px rgba(54, 76, 120, 0.065);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(93,137,236,.09), transparent 28%),
+        radial-gradient(circle at 96% 4%, rgba(181,155,232,.09), transparent 24%),
+        var(--bg);
+    }
+    .page { width: min(1560px, calc(100% - 36px)); margin: 0 auto; padding: 24px 0 48px; }
+    .topbar {
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+      padding-bottom: 17px; border-bottom: 1px solid var(--line);
+    }
+    .eyebrow { color: var(--blue); font-size: 14px; font-weight: 900; letter-spacing: .08em; margin-bottom: 7px; }
+    .title { margin: 0; font-size: clamp(27px, 3vw, 41px); line-height: 1.14; letter-spacing: -.035em; }
+    .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+    .actions { display: flex; gap: 8px; flex: 0 0 auto; }
+    button {
+      border: 1px solid var(--line); background: rgba(255,255,255,.9); color: var(--ink);
+      border-radius: 999px; padding: 10px 15px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(50,70,110,.05);
+    }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 5px; }
+    .toc a {
+      color: #3f5f9d; text-decoration: none; font-size: 12px; font-weight: 850;
+      background: rgba(255,255,255,.74); border: 1px solid #d9e4f4; border-radius: 999px; padding: 7px 11px;
+    }
+    .chapter { margin-top: 24px; scroll-margin-top: 15px; }
+    .chapter-head {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 13px; padding: 13px 15px;
+      border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.72);
+    }
+    .chapter-no {
+      width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+      color: #fff; background: var(--blue); font-size: 14px; font-weight: 950; box-shadow: 0 6px 14px rgba(47,103,223,.18);
+    }
+    .chapter-head h1 { margin: 0; font-size: 21px; line-height: 1.25; }
+    .chapter-head p { margin: 4px 0 0; color: var(--muted); font-size: 12.5px; }
+    .group { margin-top: 15px; break-inside: avoid; }
+    .group-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 2px 8px; }
+    .group-head h2 { margin: 0; font-size: 15px; line-height: 1.35; }
+    .group-head span { color: #8290a8; font-size: 10px; font-weight: 850; white-space: nowrap; }
+    .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 11px; }
+    .card {
+      min-height: 128px; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px;
+      box-shadow: var(--shadow); position: relative; overflow: hidden; break-inside: avoid;
+    }
+    .card::after { content: ""; position: absolute; width: 66px; height: 66px; right: -28px; top: -29px; border-radius: 50%; background: rgba(255,255,255,.46); }
+    .blue { background: #f1f6ff; }
+    .lilac { background: #f7f2ff; }
+    .mint { background: #eef9f6; }
+    .peach { background: #fff4ed; }
+    .yellow { background: #fff9e8; }
+    .meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; position: relative; z-index: 1; }
+    .num {
+      width: 29px; height: 29px; display: grid; place-items: center; border-radius: 9px;
+      color: var(--blue); background: rgba(255,255,255,.8); border: 1px solid rgba(104,132,184,.2);
+      font-size: 11px; font-weight: 950;
+    }
+    .tag { color: #6a7892; font-size: 10px; font-weight: 900; text-align: right; }
+    .card h3 { margin: 0 0 7px; font-size: 16px; line-height: 1.3; letter-spacing: -.01em; position: relative; z-index: 1; }
+    .card p { margin: 0; color: #46546f; font-size: 12.8px; line-height: 1.58; position: relative; z-index: 1; }
+    .source-note { margin-top: 22px; color: #8895ab; font-size: 11px; text-align: center; }
+    @media (max-width: 1250px) { .grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    @media (max-width: 930px) { .grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (max-width: 680px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .card { min-height: 122px; }
+    }
+    @media (max-width: 460px) {
+      .page { width: min(100% - 22px, 1560px); padding-top: 17px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: auto; }
+      .chapter-head p { display: none; }
+    }
+    @media print {
+      @page { size: A4 landscape; margin: 8mm; }
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .actions, .toc, .source-note { display: none; }
+      .topbar { margin-bottom: 5px; padding-bottom: 7px; }
+      .title { font-size: 18px; }
+      .subtitle, .eyebrow { font-size: 8px; }
+      .chapter { margin-top: 10px; }
+      .chapter-head { padding: 7px 8px; margin-bottom: 6px; border-radius: 9px; }
+      .chapter-no { width: 27px; height: 27px; border-radius: 8px; font-size: 9px; box-shadow: none; }
+      .chapter-head h1 { font-size: 12px; }
+      .chapter-head p { font-size: 7px; margin-top: 2px; }
+      .group { margin-top: 7px; }
+      .group-head { margin-bottom: 4px; }
+      .group-head h2 { font-size: 8.5px; }
+      .group-head span { font-size: 6.5px; }
+      .grid { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+      .card { min-height: 0; padding: 7px 8px; border-radius: 8px; box-shadow: none; }
+      .meta { margin-bottom: 4px; }
+      .num { width: 19px; height: 19px; border-radius: 6px; font-size: 7px; }
+      .tag { font-size: 6.5px; }
+      .card h3 { font-size: 9px; margin-bottom: 3px; }
+      .card p { font-size: 7.2px; line-height: 1.38; }
+    }
+
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1 class="title">GPT 生成网页 UI｜设计要点卡片</h1>
+        <p class="subtitle">网页设计基础、常见页面类型、Prompt 构成与检查清单 · 共 55 张</p>
+      </div>
+      <div class="actions"><button onclick="window.print()">打印 / 导出 PDF</button></div>
+    </header>
+
+    <nav class="toc" aria-label="分类目录">
+      <a href="#basics">01 网页 UI 设计基础 · 18 张</a>
+      <a href="#types">02 常见网页类型 · 19 张</a>
+      <a href="#prompt">03 网页生成 Prompt 构成 · 13 张</a>
+      <a href="#check">04 Landing Page 生成与检查 · 5 张</a>
+    </nav>
+
+    <section class="chapter" id="basics">
+      <div class="chapter-head"><span class="chapter-no">01</span><div><h1>网页 UI 设计基础</h1><p>从页面叙事、横向布局、信息组织和响应式设计理解网页 UI。</p></div></div>
+      <section class="group">
+        <div class="group-head"><h2>网页 UI 基础</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card blue">
+            <div class="meta"><span class="num">01</span><span class="tag">网页 UI 基础</span></div>
+            <h3>不同于移动端</h3>
+            <p>网页 UI 与移动端 UI 的设计逻辑不同。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">02</span><span class="tag">网页 UI 基础</span></div>
+            <h3>首屏叙事</h3>
+            <p>网页首屏需要快速传达页面主题与核心价值。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">03</span><span class="tag">网页 UI 基础</span></div>
+            <h3>栏目节奏</h3>
+            <p>通过模块间距、内容密度和视觉变化形成浏览节奏。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">04</span><span class="tag">网页 UI 基础</span></div>
+            <h3>横向布局</h3>
+            <p>充分利用桌面端横向空间组织内容。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">05</span><span class="tag">网页 UI 基础</span></div>
+            <h3>响应式断点</h3>
+            <p>根据不同屏幕宽度设置合理的布局断点。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>Landing Page 核心</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card lilac">
+            <div class="meta"><span class="num">06</span><span class="tag">Landing Page 核心</span></div>
+            <h3>价值主张</h3>
+            <p>先讲清楚产品或服务能为用户带来什么。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">07</span><span class="tag">Landing Page 核心</span></div>
+            <h3>CTA</h3>
+            <p>设置清晰、具体的行动按钮。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">08</span><span class="tag">Landing Page 核心</span></div>
+            <h3>信任背书</h3>
+            <p>用客户、数据、案例或评价建立信任。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">09</span><span class="tag">Landing Page 核心</span></div>
+            <h3>功能说明</h3>
+            <p>用简洁模块说明核心功能与使用价值。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">10</span><span class="tag">Landing Page 核心</span></div>
+            <h3>转化路径</h3>
+            <p>让用户从了解、信任到行动的路径保持清晰。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>SaaS 后台重点</h2><span>6 张</span></div>
+        <div class="grid">
+          <article class="card mint">
+            <div class="meta"><span class="num">11</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>导航</h3>
+            <p>用清晰的导航结构帮助用户快速定位功能。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">12</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>数据卡片</h3>
+            <p>用数据卡片突出关键指标与状态。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">13</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>表格</h3>
+            <p>用表格承载可比较、可筛选的结构化信息。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">14</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>筛选</h3>
+            <p>提供必要的筛选、搜索和排序能力。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">15</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>权限</h3>
+            <p>根据角色与任务设计功能权限和可见范围。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">16</span><span class="tag">SaaS 后台重点</span></div>
+            <h3>信息密度</h3>
+            <p>在信息完整与页面可读性之间保持平衡。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>响应式设计</h2><span>2 张</span></div>
+        <div class="grid">
+          <article class="card peach">
+            <div class="meta"><span class="num">17</span><span class="tag">响应式设计</span></div>
+            <h3>不是简单缩放</h3>
+            <p>响应式设计不是把桌面页面等比例缩小。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">18</span><span class="tag">响应式设计</span></div>
+            <h3>布局重构</h3>
+            <p>不同屏幕下需要重新安排模块、层级和交互。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+    <section class="chapter" id="types">
+      <div class="chapter-head"><span class="chapter-no">02</span><div><h1>常见网页类型</h1><p>快速查看企业官网、Landing Page、SaaS 后台和个人主页的常用模块。</p></div></div>
+      <section class="group">
+        <div class="group-head"><h2>企业官网</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card blue">
+            <div class="meta"><span class="num">19</span><span class="tag">企业官网</span></div>
+            <h3>Hero</h3>
+            <p>用首屏标题、说明和视觉建立品牌第一印象。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">20</span><span class="tag">企业官网</span></div>
+            <h3>服务</h3>
+            <p>清楚展示主要服务、能力或解决方案。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">21</span><span class="tag">企业官网</span></div>
+            <h3>案例</h3>
+            <p>用项目案例证明经验与交付能力。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">22</span><span class="tag">企业官网</span></div>
+            <h3>团队</h3>
+            <p>介绍核心成员、专业背景或组织优势。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">23</span><span class="tag">企业官网</span></div>
+            <h3>联系表单</h3>
+            <p>提供明确、低门槛的联系入口。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>Landing Page</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card lilac">
+            <div class="meta"><span class="num">24</span><span class="tag">Landing Page</span></div>
+            <h3>价值主张</h3>
+            <p>在首屏直接说明产品价值和适用对象。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">25</span><span class="tag">Landing Page</span></div>
+            <h3>CTA</h3>
+            <p>围绕单一转化目标设置主要行动按钮。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">26</span><span class="tag">Landing Page</span></div>
+            <h3>卖点</h3>
+            <p>按优先级展示核心卖点与差异化优势。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">27</span><span class="tag">Landing Page</span></div>
+            <h3>用户评价</h3>
+            <p>用真实评价、客户标识或使用数据增强可信度。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">28</span><span class="tag">Landing Page</span></div>
+            <h3>FAQ</h3>
+            <p>集中回答用户在行动前最常见的疑问。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>SaaS 后台</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card mint">
+            <div class="meta"><span class="num">29</span><span class="tag">SaaS 后台</span></div>
+            <h3>侧边栏</h3>
+            <p>用侧边栏承载主要功能分区与层级导航。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">30</span><span class="tag">SaaS 后台</span></div>
+            <h3>数据卡片</h3>
+            <p>在顶部展示最需要关注的关键指标。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">31</span><span class="tag">SaaS 后台</span></div>
+            <h3>表格</h3>
+            <p>集中呈现记录、状态、负责人和操作入口。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">32</span><span class="tag">SaaS 后台</span></div>
+            <h3>筛选</h3>
+            <p>帮助用户快速缩小数据范围并找到目标内容。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">33</span><span class="tag">SaaS 后台</span></div>
+            <h3>设置</h3>
+            <p>统一承载账户、团队、权限和系统配置。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>个人主页</h2><span>4 张</span></div>
+        <div class="grid">
+          <article class="card peach">
+            <div class="meta"><span class="num">34</span><span class="tag">个人主页</span></div>
+            <h3>作品集</h3>
+            <p>展示代表作品、项目过程与最终成果。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">35</span><span class="tag">个人主页</span></div>
+            <h3>个人介绍</h3>
+            <p>说明个人定位、专长与合作方向。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">36</span><span class="tag">个人主页</span></div>
+            <h3>简历</h3>
+            <p>提供经历、技能和教育背景等关键信息。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">37</span><span class="tag">个人主页</span></div>
+            <h3>博客入口</h3>
+            <p>连接文章、观点或长期内容沉淀。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+    <section class="chapter" id="prompt">
+      <div class="chapter-head"><span class="chapter-no">03</span><div><h1>网页生成 Prompt 构成</h1><p>用页面类型、视觉风格、信息模块、页面规格和转化目标描述需求。</p></div></div>
+      <section class="group">
+        <div class="group-head"><h2>基础四要素</h2><span>4 张</span></div>
+        <div class="grid">
+          <article class="card yellow">
+            <div class="meta"><span class="num">38</span><span class="tag">基础四要素</span></div>
+            <h3>页面类型</h3>
+            <p>明确要生成企业官网、Landing Page、后台或个人主页。</p>
+          </article>
+          <article class="card yellow">
+            <div class="meta"><span class="num">39</span><span class="tag">基础四要素</span></div>
+            <h3>视觉风格</h3>
+            <p>说明色彩、气质、品牌感和参考方向。</p>
+          </article>
+          <article class="card yellow">
+            <div class="meta"><span class="num">40</span><span class="tag">基础四要素</span></div>
+            <h3>信息模块</h3>
+            <p>列出页面需要包含的主要栏目与内容。</p>
+          </article>
+          <article class="card yellow">
+            <div class="meta"><span class="num">41</span><span class="tag">基础四要素</span></div>
+            <h3>布局方式</h3>
+            <p>说明单栏、多栏、卡片式、侧边栏等布局偏好。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>页面规格</h2><span>3 张</span></div>
+        <div class="grid">
+          <article class="card blue">
+            <div class="meta"><span class="num">42</span><span class="tag">页面规格</span></div>
+            <h3>桌面端宽度</h3>
+            <p>说明内容最大宽度、留白和整体页面尺度。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">43</span><span class="tag">页面规格</span></div>
+            <h3>栅格系统</h3>
+            <p>明确列数、间距和模块对齐方式。</p>
+          </article>
+          <article class="card blue">
+            <div class="meta"><span class="num">44</span><span class="tag">页面规格</span></div>
+            <h3>响应式要求</h3>
+            <p>说明桌面、平板和手机端的适配方式。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>转化目标</h2><span>4 张</span></div>
+        <div class="grid">
+          <article class="card lilac">
+            <div class="meta"><span class="num">45</span><span class="tag">转化目标</span></div>
+            <h3>注册</h3>
+            <p>把注册或创建账户设为主要行动。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">46</span><span class="tag">转化目标</span></div>
+            <h3>咨询</h3>
+            <p>把提交需求或联系顾问设为主要行动。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">47</span><span class="tag">转化目标</span></div>
+            <h3>下载</h3>
+            <p>把下载资料、应用或模板设为主要行动。</p>
+          </article>
+          <article class="card lilac">
+            <div class="meta"><span class="num">48</span><span class="tag">转化目标</span></div>
+            <h3>预约</h3>
+            <p>把预约演示、会议或服务设为主要行动。</p>
+          </article>
+        </div>
+      </section>
+      <section class="group">
+        <div class="group-head"><h2>文案要求</h2><span>2 张</span></div>
+        <div class="grid">
+          <article class="card mint">
+            <div class="meta"><span class="num">49</span><span class="tag">文案要求</span></div>
+            <h3>真实文案</h3>
+            <p>使用贴近真实业务场景的标题、说明和按钮文案。</p>
+          </article>
+          <article class="card mint">
+            <div class="meta"><span class="num">50</span><span class="tag">文案要求</span></div>
+            <h3>避免占位文字</h3>
+            <p>减少 Lorem Ipsum 等无意义占位内容。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+    <section class="chapter" id="check">
+      <div class="chapter-head"><span class="chapter-no">04</span><div><h1>Landing Page 生成与检查</h1><p>生成页面后，检查 Prompt、行动按钮、模块顺序、视觉层级和页面结构。</p></div></div>
+      <section class="group">
+        <div class="group-head"><h2>生成与检查清单</h2><span>5 张</span></div>
+        <div class="grid">
+          <article class="card peach">
+            <div class="meta"><span class="num">51</span><span class="tag">生成与检查清单</span></div>
+            <h3>扩展完整 Prompt</h3>
+            <p>把一句需求扩展为包含类型、风格、模块和目标的完整 Prompt。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">52</span><span class="tag">生成与检查清单</span></div>
+            <h3>检查 CTA</h3>
+            <p>确认 CTA 清晰、具体，并与页面转化目标一致。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">53</span><span class="tag">生成与检查清单</span></div>
+            <h3>检查模块顺序</h3>
+            <p>确认模块顺序符合用户的浏览与决策路径。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">54</span><span class="tag">生成与检查清单</span></div>
+            <h3>检查视觉层级</h3>
+            <p>确认标题、正文、图片和行动按钮的层级明确。</p>
+          </article>
+          <article class="card peach">
+            <div class="meta"><span class="num">55</span><span class="tag">生成与检查清单</span></div>
+            <h3>输出结构清单</h3>
+            <p>列出页面模块、内容重点与呈现顺序，便于继续迭代。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <p class="source-note">网页 UI 设计与生成速查卡。</p>
+  </main>
+</body>
+</html>
