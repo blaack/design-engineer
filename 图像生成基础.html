@@ -1,0 +1,2963 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>GPT生成UI图像基础</title><style>
+
+:root {
+  --bg: #f6efe4;
+  --paper: #fffdf8;
+  --paper-soft: #fff7ed;
+  --ink: #25211d;
+  --muted: #5f574e;
+  --soft: #8b7e72;
+  --line: #dfd0bd;
+  --line-strong: #c9b59f;
+  --accent: #d98270;
+  --accent-deep: #a85b4d;
+  --sage: #7da896;
+  --sage-soft: #e7f0ea;
+  --blue: #91a4ca;
+  --blue-soft: #eef1f8;
+  --yellow: #d8b76f;
+  --yellow-soft: #fbf1d7;
+  --rose: #f3ddd4;
+  --card: rgba(255, 253, 248, 0.96);
+  --card-soft: rgba(255, 248, 238, 0.9);
+  --shadow: 0 24px 70px rgba(73, 50, 28, 0.09);
+  --shadow-soft: 0 14px 38px rgba(73, 50, 28, 0.065);
+  --shadow-tiny: 0 8px 22px rgba(73, 50, 28, 0.045);
+  --radius-xl: 30px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --max: 1680px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 8% 5%, rgba(217, 130, 112, 0.15), transparent 28%),
+    radial-gradient(circle at 92% 9%, rgba(125, 168, 150, 0.14), transparent 30%),
+    radial-gradient(circle at 46% 42%, rgba(216, 183, 111, 0.08), transparent 34%),
+    linear-gradient(180deg, #fffaf2 0%, var(--bg) 52%, #fffaf2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  line-height: 1.78;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.23;
+  background-image:
+    linear-gradient(rgba(210, 196, 178, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(210, 196, 178, 0.16) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.55), transparent 82%);
+}
+
+a { color: inherit; }
+
+.page {
+  position: relative;
+  width: min(var(--max), calc(100% - 48px));
+  margin: 0 auto;
+  padding: 24px 0 84px;
+}
+
+.topbar {
+  position: sticky;
+  top: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  margin: 0 0 28px;
+  padding: 14px 22px;
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 14px 34px rgba(73, 50, 28, 0.07);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 181, 159, 0.9);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.95), transparent 34%),
+    linear-gradient(135deg, #fff7ec, #f3ddd4);
+  color: var(--accent-deep);
+  box-shadow: inset 0 -8px 16px rgba(168, 91, 77, 0.08);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.nav a {
+  padding: 8px 13px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  transition: 0.22s ease;
+}
+
+.nav a:hover {
+  color: var(--accent-deep);
+  background: rgba(243, 221, 212, 0.62);
+  transform: translateY(-1px);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 610px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(420px, 0.95fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 86px);
+  padding: clamp(42px, 6vw, 92px);
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 15% 12%, rgba(217,130,112,0.13), transparent 34%),
+    radial-gradient(circle at 86% 16%, rgba(125,168,150,0.12), transparent 34%),
+    linear-gradient(135deg, rgba(255,253,248,0.96), rgba(255,247,237,0.9));
+  box-shadow: var(--shadow);
+}
+
+.hero::after {
+  content: "02";
+  position: absolute;
+  right: clamp(8px, 4vw, 64px);
+  bottom: -40px;
+  font-size: clamp(110px, 17vw, 280px);
+  font-weight: 950;
+  letter-spacing: -0.075em;
+  line-height: 1;
+  color: rgba(168, 91, 77, 0.07);
+  pointer-events: none;
+}
+
+.hero-content,
+.hero-visual { position: relative; z-index: 1; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid rgba(223, 208, 189, 0.92);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--accent-deep);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-tiny);
+}
+
+.eyebrow::before { content: "✦"; color: var(--accent); }
+
+h1 {
+  max-width: 960px;
+  margin: 24px 0 22px;
+  font-size: clamp(50px, 8vw, 118px);
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+}
+
+.hero-lead {
+  max-width: 850px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(19px, 1.45vw, 24px);
+  line-height: 1.85;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 950;
+  transition: 0.22s ease;
+}
+
+.btn-primary {
+  color: #fffaf2;
+  background: linear-gradient(135deg, #2f2924, #4a3d34);
+  box-shadow: 0 18px 36px rgba(47, 41, 36, 0.20);
+}
+
+.btn-secondary {
+  color: var(--accent-deep);
+  background: rgba(255, 253, 248, 0.74);
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  box-shadow: var(--shadow-tiny);
+}
+
+.btn:hover { transform: translateY(-2px); }
+
+.hero-visual {
+  display: grid;
+  gap: 16px;
+}
+
+.visual-card {
+  padding: 24px;
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.78);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+}
+
+.visual-card.large {
+  min-height: 270px;
+  display: grid;
+  align-content: space-between;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(217,130,112,0.18), transparent 32%),
+    radial-gradient(circle at 84% 18%, rgba(125,168,150,0.18), transparent 32%),
+    linear-gradient(135deg, rgba(255,253,248,0.9), rgba(255,247,237,0.9));
+}
+
+.visual-kicker {
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.visual-title {
+  margin: 12px 0 10px;
+  font-size: clamp(30px, 3.05vw, 52px);
+  line-height: 1.06;
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+
+.visual-card p { margin: 0; color: var(--muted); }
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.mini {
+  min-height: 120px;
+  padding: 17px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: var(--shadow-tiny);
+}
+
+.mini b {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 17px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.mini span { color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+
+.section {
+  padding: clamp(62px, 7vw, 108px) 0 0;
+}
+
+.section-shell {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(30px, 4vw, 58px);
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 6% 0%, rgba(217,130,112,0.055), transparent 28%),
+    linear-gradient(180deg, rgba(255,253,248,0.97), rgba(255,248,238,0.91));
+  box-shadow: var(--shadow-soft);
+}
+
+.section-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--accent), var(--yellow), var(--sage), transparent 82%);
+  opacity: 0.72;
+}
+
+.section-head {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(320px, 0.48fr);
+  gap: 28px;
+  align-items: end;
+  margin-bottom: clamp(26px, 3.3vw, 52px);
+}
+
+.section-tag {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(243, 221, 212, 0.72);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(223, 208, 189, 0.86);
+}
+
+.section h2 {
+  max-width: 1050px;
+  margin: 14px 0 0;
+  font-size: clamp(34px, 5vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.062em;
+}
+
+.section-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(17px, 1.35vw, 21px);
+  line-height: 1.85;
+}
+
+.highlight {
+  display: inline;
+  padding: 0.05em 0.24em;
+  border-radius: 8px;
+  background: linear-gradient(transparent 54%, rgba(216, 183, 111, 0.42) 54%);
+  font-weight: 950;
+}
+
+.cards-3,
+.cards-4,
+.cards-2 {
+  display: grid;
+  gap: 18px;
+}
+
+.cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.card,
+.flow-card,
+.compare-row,
+.step,
+.prompt-card,
+.table-card,
+.example-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card:hover,
+.flow-card:hover,
+.compare-row:hover,
+.step:hover,
+.prompt-card:hover,
+.table-card:hover,
+.example-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201, 181, 159, 0.98);
+  box-shadow: 0 16px 40px rgba(73, 50, 28, 0.08);
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  padding: 24px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--card), var(--card-soft));
+  box-shadow: var(--shadow-tiny);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 24px;
+  width: 6px;
+  height: 40px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), rgba(216, 183, 111, 0.72));
+}
+
+.card h3 {
+  margin: 0 0 11px;
+  padding-left: 18px;
+  font-size: clamp(21px, 1.8vw, 30px);
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+}
+
+.card p { margin: 0; color: var(--muted); }
+
+.card ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.card li {
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(223, 208, 189, 0.76);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #51483f;
+  line-height: 1.55;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid rgba(223, 208, 189, 0.88);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(73, 50, 28, 0.035);
+}
+
+.flow-board {
+  display: grid;
+  gap: 18px;
+}
+
+.flow-card {
+  padding: 24px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--card), var(--card-soft));
+  box-shadow: var(--shadow-tiny);
+}
+
+.flow-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.flow-title h3 {
+  margin: 0;
+  font-size: clamp(24px, 2vw, 34px);
+  letter-spacing: -0.04em;
+}
+
+.flow-tag {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(243, 221, 212, 0.68);
+  color: var(--accent-deep);
+  border: 1px solid rgba(223, 208, 189, 0.78);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.flow-steps {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.flow-steps.ai { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+.flow-step {
+  position: relative;
+  min-height: 96px;
+  padding: 14px;
+  border: 1px solid rgba(223, 208, 189, 0.78);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.flow-step b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.flow-step span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.matrix .card { min-height: 210px; }
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.placeholder {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  border: 1.6px dashed #d4bfa8;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: #7d665b;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.76), rgba(255,247,236,0.72)),
+    repeating-linear-gradient(45deg, transparent 0 14px, rgba(217, 130, 112, 0.055) 14px 28px);
+}
+
+.placeholder strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #52463d;
+  font-size: clamp(22px, 2.2vw, 34px);
+  letter-spacing: -0.04em;
+}
+
+.placeholder span { display: block; color: #7d665b; }
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.step {
+  padding: 24px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.88);
+  box-shadow: var(--shadow-tiny);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 42px;
+  margin-bottom: 18px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 168, 150, 0.36);
+  background: var(--sage-soft);
+  color: #427c68;
+  font-weight: 950;
+}
+
+.step h3 {
+  margin: 0 0 8px;
+  font-size: clamp(22px, 2vw, 32px);
+  letter-spacing: -0.04em;
+}
+
+.step p { margin: 0; color: var(--muted); }
+
+.intervention-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.intervention-grid .card { min-height: 420px; }
+
+.compare-list {
+  display: grid;
+  gap: 14px;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 18px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.88);
+  box-shadow: var(--shadow-tiny);
+}
+
+.compare-side {
+  padding: 16px;
+  border: 1px solid rgba(223, 208, 189, 0.76);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.58);
+}
+
+.compare-side b {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.compare-side span {
+  color: var(--muted);
+}
+
+.vs {
+  display: grid;
+  place-items: center;
+  color: var(--accent-deep);
+  font-weight: 950;
+}
+
+.task-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.prompt-card,
+.table-card,
+.example-card {
+  padding: 24px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--card), var(--card-soft));
+  box-shadow: var(--shadow-tiny);
+}
+
+.prompt-card h3,
+.table-card h3,
+.example-card h3 {
+  margin: 0 0 14px;
+  font-size: clamp(22px, 2vw, 32px);
+  letter-spacing: -0.04em;
+}
+
+.prompt-box {
+  display: grid;
+  gap: 10px;
+}
+
+.prompt-mini {
+  padding: 13px 15px;
+  border: 1px solid rgba(223, 208, 189, 0.76);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.58);
+  color: #51483f;
+  line-height: 1.72;
+}
+
+.prompt-mini strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.compare-table {
+  display: grid;
+  gap: 10px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1fr;
+  gap: 10px;
+}
+
+.table-row > div {
+  padding: 12px 14px;
+  border: 1px solid rgba(223, 208, 189, 0.76);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.58);
+  color: #51483f;
+}
+
+.table-row.header > div {
+  color: var(--accent-deep);
+  font-weight: 950;
+  background: rgba(243, 221, 212, 0.52);
+}
+
+.final-cta {
+  margin-top: clamp(62px, 7vw, 108px);
+  padding: clamp(42px, 6vw, 82px);
+  border: 1px solid rgba(223, 208, 189, 0.96);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  background:
+    radial-gradient(circle at 16% 10%, rgba(217,130,112,0.13), transparent 32%),
+    radial-gradient(circle at 88% 12%, rgba(125,168,150,0.12), transparent 32%),
+    linear-gradient(180deg, rgba(255,253,248,0.96), rgba(255,248,238,0.9));
+  box-shadow: var(--shadow-soft);
+}
+
+.final-cta h2 {
+  max-width: 1060px;
+  margin: 0 auto 16px;
+  font-size: clamp(34px, 5.4vw, 82px);
+  line-height: 1.03;
+  letter-spacing: -0.065em;
+}
+
+.final-cta p {
+  max-width: 900px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: clamp(17px, 1.45vw, 22px);
+  line-height: 1.85;
+}
+
+
+/* 防止中文标题被挤成单字换行 */
+h1,
+.section h2,
+.visual-title,
+.card h3,
+.flow-title h3,
+.step h3,
+.placeholder strong,
+.prompt-card h3,
+.table-card h3,
+.example-card h3,
+.compare-side b,
+.flow-step b {
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+/* 宽屏下自动调整小模块列数，避免标题被挤压 */
+.cards-4 {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.intervention-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.matrix {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.choice-wall {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.example-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.example-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  color: var(--accent-deep);
+  background: rgba(255, 253, 248, 0.78);
+  border: 1px solid rgba(223, 208, 189, 0.9);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 900;
+  transition: 0.22s ease;
+  box-shadow: var(--shadow-tiny);
+}
+
+.example-link:hover {
+  transform: translateY(-2px);
+  background: rgba(243, 221, 212, 0.64);
+  color: var(--ink);
+}
+
+@media (min-width: 1800px) {
+  :root { --max: 1760px; }
+  .page { width: min(var(--max), calc(100% - 72px)); }
+}
+
+@media (max-width: 1400px) {
+  .intervention-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .flow-steps,
+  .flow-steps.ai { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1280px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-visual { max-width: 920px; }
+  .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 980px) {
+  .page { width: min(100% - 28px, var(--max)); padding-top: 14px; }
+  .topbar { position: relative; top: 0; align-items: flex-start; flex-direction: column; padding: 16px 18px; border-radius: 28px; }
+  .nav { justify-content: flex-start; }
+  .nav a { padding: 7px 10px; }
+  .hero { padding: 34px 22px; }
+  h1 { font-size: clamp(44px, 16vw, 78px); }
+  .visual-title { white-space: normal; font-size: clamp(30px, 8.8vw, 48px); }
+  .section-head,
+  .showcase-grid,
+  .task-grid { grid-template-columns: 1fr; }
+  .cards-3,
+  .cards-2,
+  .cards-4,
+  .timeline,
+  .intervention-grid,
+  .matrix,
+  .mini-grid { grid-template-columns: 1fr; }
+  .flow-steps,
+  .flow-steps.ai { grid-template-columns: 1fr; }
+  .section-shell { padding: 22px; }
+  .placeholder { min-height: 240px; }
+  .compare-row { grid-template-columns: 1fr; }
+  .vs { min-height: 30px; }
+  .table-row { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #fff; }
+  body::before, .topbar { display: none; }
+  .page { width: 100%; padding: 0; }
+  .hero,
+  .section-shell,
+  .final-cta { box-shadow: none; break-inside: avoid; }
+  .section { padding-top: 28px; }
+}
+
+  
+/* 小卡片换行修正：避免标题、节点名、标签出现单字换行 */
+.card h3,
+.flow-step b,
+.step h3,
+.mini b,
+.compare-side b,
+.prompt-card h3,
+.table-card h3,
+.example-card h3,
+.prompt-mini strong,
+.structure-item b,
+.table-row > div:first-child,
+.pill,
+.flow-tag,
+.section-tag,
+.type,
+.item strong {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+/* 小卡片标题略微收紧，避免中文标题被挤压 */
+.card h3 {
+  font-size: clamp(20px, 1.55vw, 28px);
+  letter-spacing: -0.035em;
+}
+
+/* 小模块网格最小宽度加大，减少窄列导致的异常换行 */
+.cards-3 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.cards-4 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.matrix {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.intervention-grid {
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.flow-steps,
+.flow-steps.ai {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.flow-step {
+  min-width: 0;
+}
+
+.flow-step b {
+  font-size: 15px;
+}
+
+.choice-wall {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* 对比行左右小卡片留出更舒适的标题空间 */
+.compare-side {
+  min-width: 0;
+}
+
+.compare-side b {
+  font-size: clamp(17px, 1.25vw, 20px);
+}
+
+/* 表格第一列不拆字，窄屏时仍保持易读 */
+.table-row > div:first-child {
+  min-width: 88px;
+}
+
+/* 移动端允许自然换行，避免超出屏幕 */
+@media (max-width: 980px) {
+  .card h3,
+  .flow-step b,
+  .step h3,
+  .mini b,
+  .compare-side b,
+  .prompt-card h3,
+  .table-card h3,
+  .example-card h3,
+  .prompt-mini strong,
+  .structure-item b,
+  .table-row > div:first-child,
+  .pill,
+  .flow-tag,
+  .section-tag,
+  .type,
+  .item strong {
+    white-space: normal;
+  }
+}
+
+
+/* AI 工具对照表：宽屏表格 + 移动端卡片化 */
+.ai-tool-table {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-tool-row {
+  display: grid;
+  grid-template-columns: 0.72fr 1.25fr 1.18fr 1.15fr;
+  gap: 10px;
+}
+
+.ai-tool-row > div {
+  padding: 14px 16px;
+  border: 1px solid rgba(223, 208, 189, 0.76);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.58);
+  color: #51483f;
+  line-height: 1.72;
+}
+
+.ai-tool-row.header > div {
+  color: var(--accent-deep);
+  font-weight: 950;
+  background: rgba(243, 221, 212, 0.52);
+}
+
+.ai-tool-row b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 17px;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.ai-tool-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ai-tool-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(223, 208, 189, 0.84);
+  background: rgba(255,253,248,0.82);
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.ai-tool-note {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(223, 208, 189, 0.86);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.74);
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .ai-tool-row,
+  .ai-tool-row.header {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-tool-row.header { display: none; }
+
+  .ai-tool-row > div::before {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--accent-deep);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+  }
+
+  .ai-tool-row > div:nth-child(1)::before { content: "任务类型"; }
+  .ai-tool-row > div:nth-child(2)::before { content: "推荐 AI"; }
+  .ai-tool-row > div:nth-child(3)::before { content: "适合用途"; }
+  .ai-tool-row > div:nth-child(4)::before { content: "输出与注意事项"; }
+
+  .ai-tool-row b,
+  .ai-tool-chip { white-space: normal; }
+}
+
+
+  
+
+/* Module 02 · GPT 生图范围标签地图 */
+.tag-atlas {
+  display: grid;
+  gap: 18px;
+}
+
+.tag-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 18px 20px;
+  border: 1px solid rgba(223, 208, 189, 0.9);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.8);
+  box-shadow: var(--shadow-tiny);
+}
+
+.tag-legend-copy {
+  max-width: 960px;
+  color: var(--muted);
+}
+
+.tag-legend-copy strong {
+  color: var(--ink);
+}
+
+.legend-items {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-label {
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.tag-group-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.tag-group {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255,253,248,0.96), rgba(255,248,238,0.9));
+  box-shadow: var(--shadow-tiny);
+}
+
+.tag-group::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -70px;
+  top: -82px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(217,130,112,0.11), transparent 70%);
+  pointer-events: none;
+}
+
+.tag-group-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.tag-group-head h3 {
+  margin: 0;
+  font-size: clamp(21px, 1.65vw, 28px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.tag-group-head p {
+  max-width: 330px;
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tag-index {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(223, 208, 189, 0.88);
+  background: rgba(255,255,255,0.62);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.tag-cloud {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(223, 208, 189, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #5b5148;
+  font-size: 13px;
+  font-weight: 820;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(73, 50, 28, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.keyword-tag:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201,181,159,0.98);
+  box-shadow: 0 10px 22px rgba(73,50,28,0.07);
+}
+
+.keyword-tag.design {
+  border-color: rgba(217, 130, 112, 0.48);
+  background:
+    linear-gradient(135deg, rgba(243,221,212,0.94), rgba(255,247,237,0.96));
+  color: var(--accent-deep);
+  font-weight: 950;
+}
+
+.keyword-tag.design::before {
+  content: "✦";
+  margin-right: 6px;
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.keyword-tag.sample {
+  pointer-events: none;
+}
+
+.keyword-tag.sample.design {
+  margin-left: 2px;
+}
+
+.design-focus {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.design-focus-main,
+.design-caution {
+  padding: 24px;
+  border: 1px solid rgba(223,208,189,0.94);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-tiny);
+}
+
+.design-focus-main {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(217,130,112,0.13), transparent 34%),
+    linear-gradient(180deg, rgba(255,253,248,0.96), rgba(255,248,238,0.9));
+}
+
+.design-focus-main h3,
+.design-caution h3 {
+  margin: 0 0 10px;
+  font-size: clamp(22px, 2vw, 32px);
+  letter-spacing: -0.04em;
+}
+
+.design-focus-main p,
+.design-caution p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.design-focus-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.design-focus-point {
+  padding: 14px;
+  border: 1px solid rgba(223,208,189,0.78);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.58);
+}
+
+.design-focus-point b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.design-focus-point span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.design-caution {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(125,168,150,0.14), transparent 32%),
+    rgba(255,253,248,0.86);
+}
+
+.caution-list {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caution-list li {
+  padding: 10px 12px;
+  border: 1px solid rgba(223,208,189,0.74);
+  border-radius: 13px;
+  background: rgba(255,255,255,0.56);
+  color: #51483f;
+  line-height: 1.55;
+}
+
+@media (max-width: 1080px) {
+  .tag-group-grid,
+  .design-focus { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .tag-group { padding: 18px; }
+  .tag-group-head { flex-direction: column-reverse; }
+  .tag-group-head p { max-width: none; }
+  .design-focus-points { grid-template-columns: 1fr; }
+  .keyword-tag { white-space: normal; }
+}
+
+  
+
+/* ===== 内容阅读增强组件 ===== */
+.lesson-overview {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.lesson-panel,
+.teach-note,
+.question-box,
+.summary-box,
+.demo-script,
+.warning-box,
+.formula-box {
+  padding: 22px;
+  border: 1px solid rgba(223, 208, 189, 0.94);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 253, 248, 0.86);
+  box-shadow: var(--shadow-tiny);
+}
+
+.lesson-panel h3,
+.teach-note h3,
+.question-box h3,
+.summary-box h3,
+.demo-script h3,
+.warning-box h3,
+.formula-box h3 {
+  margin: 0 0 10px;
+  font-size: clamp(21px, 1.8vw, 30px);
+  letter-spacing: -0.04em;
+}
+
+.lesson-panel p,
+.teach-note p,
+.question-box p,
+.summary-box p,
+.demo-script p,
+.warning-box p,
+.formula-box p { margin: 0; color: var(--muted); }
+
+.lesson-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.lesson-metric {
+  padding: 14px;
+  border: 1px solid rgba(223, 208, 189, 0.78);
+  border-radius: 15px;
+  background: rgba(255,255,255,0.58);
+}
+
+.lesson-metric b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--accent-deep);
+  font-size: 18px;
+}
+
+.lesson-metric span { display: block; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+.teach-note {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(216,183,111,.18), transparent 34%),
+    rgba(255,253,248,.9);
+}
+
+.teach-note::before,
+.question-box::before,
+.warning-box::before,
+.summary-box::before {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.teach-note::before { content: "使用提示"; color: #8b641e; background: var(--yellow-soft); }
+.question-box::before { content: "思考一下"; color: #497463; background: var(--sage-soft); }
+.warning-box::before { content: "常见误区"; color: var(--accent-deep); background: var(--rose); }
+.summary-box::before { content: "关键结论"; color: #53668d; background: var(--blue-soft); }
+
+.marker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(223,208,189,.85);
+  background: rgba(255,255,255,.62);
+  color: #554b42;
+  font-size: 13px;
+  font-weight: 900;
+}
+.marker::before { content: "●"; color: var(--accent); font-size: 8px; }
+.marker.sage::before { color: var(--sage); }
+.marker.blue::before { color: var(--blue); }
+.marker.yellow::before { color: var(--yellow); }
+
+.card-kicker {
+  display: inline-flex;
+  margin: 0 0 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(243,221,212,.68);
+  color: var(--accent-deep);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.detail-list {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.detail-list li {
+  position: relative;
+  padding: 11px 12px 11px 38px;
+  border: 1px solid rgba(223,208,189,.74);
+  border-radius: 13px;
+  background: rgba(255,255,255,.56);
+  color: #51483f;
+  line-height: 1.6;
+}
+.detail-list li::before {
+  content: attr(data-no);
+  position: absolute;
+  left: 11px;
+  top: 11px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--accent-deep);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.key-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.key-item {
+  padding: 16px;
+  border: 1px solid rgba(223,208,189,.82);
+  border-radius: 16px;
+  background: rgba(255,255,255,.56);
+}
+.key-item b { display:block; margin-bottom: 5px; color: var(--ink); }
+.key-item span { display:block; color:var(--muted); font-size:13px; line-height:1.55; }
+
+.concept-line {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+.concept-node {
+  position: relative;
+  min-height: 116px;
+  padding: 16px;
+  border: 1px solid rgba(223,208,189,.8);
+  border-radius: 16px;
+  background: rgba(255,255,255,.58);
+}
+.concept-node:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -15px;
+  top: 42%;
+  z-index: 2;
+  color: var(--accent-deep);
+  font-weight: 950;
+}
+.concept-node b { display:block; margin-bottom:6px; }
+.concept-node span { display:block; color:var(--muted); font-size:13px; line-height:1.55; }
+
+.method-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.method-meta div {
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(223,208,189,.74);
+  background: rgba(255,255,255,.55);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.method-meta b { display:block; color:var(--ink); margin-bottom:2px; }
+
+.decision-board {
+  display:grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 12px;
+}
+.decision-item {
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(223,208,189,.8);
+  background: rgba(255,255,255,.58);
+}
+.decision-item small { display:block; color:var(--accent-deep); font-weight:950; letter-spacing:.07em; margin-bottom:6px; }
+.decision-item b { display:block; margin-bottom:5px; font-size:17px; }
+.decision-item span { color:var(--muted); font-size:13px; line-height:1.55; }
+
+.prompt-formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.prompt-token {
+  padding: 9px 12px;
+  border-radius: 13px;
+  border: 1px solid rgba(223,208,189,.8);
+  background: rgba(255,255,255,.62);
+  color: var(--ink);
+  font-weight: 900;
+}
+.prompt-plus { color: var(--accent-deep); font-weight: 950; }
+
+.prompt-sample {
+  margin: 14px 0 0;
+  padding: 18px 20px;
+  border: 1px solid rgba(223,208,189,.85);
+  border-radius: 16px;
+  background: #fffaf3;
+  color: #4c433b;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.prompt-sample mark {
+  padding: 2px 4px;
+  border-radius: 5px;
+  color: inherit;
+  background: rgba(216,183,111,.32);
+}
+.prompt-sample mark.structure { background: rgba(145,164,202,.24); }
+.prompt-sample mark.style { background: rgba(217,130,112,.22); }
+.prompt-sample mark.constraint { background: rgba(125,168,150,.25); }
+
+.annotation-legend {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+.annotation-legend span {
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid rgba(223,208,189,.7);
+}
+.annotation-legend .a { background:rgba(216,183,111,.26); }
+.annotation-legend .b { background:rgba(145,164,202,.2); }
+.annotation-legend .c { background:rgba(217,130,112,.2); }
+.annotation-legend .d { background:rgba(125,168,150,.22); }
+
+.score-grid {
+  display:grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.score-card {
+  padding:18px;
+  border:1px solid rgba(223,208,189,.82);
+  border-radius:16px;
+  background:rgba(255,255,255,.58);
+}
+.score-card .score {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:42px;
+  height:32px;
+  margin-bottom:10px;
+  padding:0 10px;
+  border-radius:999px;
+  background:var(--rose);
+  color:var(--accent-deep);
+  font-weight:950;
+}
+.score-card b { display:block; margin-bottom:5px; font-size:17px; }
+.score-card span { color:var(--muted); font-size:13px; line-height:1.55; }
+
+.check-list {
+  display:grid;
+  gap:9px;
+  margin:14px 0 0;
+  padding:0;
+  list-style:none;
+}
+.check-list li {
+  position:relative;
+  padding:10px 12px 10px 36px;
+  border:1px solid rgba(223,208,189,.74);
+  border-radius:13px;
+  background:rgba(255,255,255,.56);
+  color:#51483f;
+}
+.check-list li::before {
+  content:"✓";
+  position:absolute;
+  left:12px;
+  top:10px;
+  color:#427c68;
+  font-weight:950;
+}
+
+.time-plan {
+  display:grid;
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  gap:10px;
+}
+.time-item {
+  padding:16px;
+  border:1px solid rgba(223,208,189,.8);
+  border-radius:16px;
+  background:rgba(255,255,255,.58);
+}
+.time-item b { display:block; color:var(--accent-deep); margin-bottom:5px; }
+.time-item strong { display:block; margin-bottom:4px; }
+.time-item span { display:block; color:var(--muted); font-size:13px; line-height:1.5; }
+
+.module-footer {
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+  margin-top:18px;
+}
+
+@media (max-width: 1100px) {
+  .lesson-overview,
+  .module-footer { grid-template-columns:1fr; }
+  .lesson-metrics,
+  .key-grid,
+  .decision-board { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .concept-line { grid-template-columns:1fr; }
+  .concept-node:not(:last-child)::after { content:"↓"; right:auto; left:49%; top:auto; bottom:-18px; }
+  .time-plan { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 720px) {
+  .lesson-metrics,
+  .key-grid,
+  .decision-board,
+  .score-grid,
+  .time-plan,
+  .method-meta { grid-template-columns:1fr; }
+  .lesson-panel,.teach-note,.question-box,.summary-box,.demo-script,.warning-box,.formula-box { padding:18px; }
+}
+
+
+
+/* ===== 小卡片信息层级优化 ===== */
+.card,
+.mini,
+.flow-step,
+.concept-node,
+.method-meta > div,
+.decision-item,
+.key-item,
+.score-card,
+.design-focus-point,
+.time-item {
+  border-color: rgba(207, 188, 166, 0.92);
+  background: rgba(255, 254, 250, 0.96);
+  box-shadow: 0 8px 20px rgba(73, 50, 28, 0.045);
+}
+
+.card {
+  padding: 23px;
+  background: linear-gradient(180deg, rgba(255,254,250,.99), rgba(255,249,240,.94));
+}
+
+.card::before {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 4px;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--accent), var(--yellow), var(--sage));
+  opacity: .8;
+}
+
+.card h3 {
+  padding-left: 0;
+  margin-bottom: 10px;
+  font-size: clamp(20px, 1.55vw, 27px);
+  line-height: 1.25;
+}
+
+.card p {
+  color: #655c53;
+  font-size: 14px;
+  line-height: 1.76;
+}
+
+.card ul {
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.card li {
+  position: relative;
+  min-height: 42px;
+  padding: 10px 12px 10px 34px;
+  border-color: rgba(223, 208, 189, 0.82);
+  background: rgba(255,255,255,.78);
+  color: #4e463f;
+  line-height: 1.58;
+}
+
+.card li::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 17px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(217,130,112,.12);
+}
+
+.card-kicker {
+  margin-bottom: 10px;
+  border: 1px solid rgba(217,130,112,.24);
+  background: rgba(243,221,212,.58);
+}
+
+.mini {
+  position: relative;
+  overflow: hidden;
+  min-height: 116px;
+  padding: 18px;
+}
+
+.mini::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--yellow));
+}
+
+.mini b {
+  margin-bottom: 7px;
+  font-size: 18px;
+}
+
+.mini span {
+  color: #655c53;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.flow-step,
+.concept-node,
+.decision-item,
+.key-item,
+.score-card,
+.design-focus-point {
+  position: relative;
+  overflow: hidden;
+}
+
+.flow-step::before,
+.concept-node::before,
+.decision-item::before,
+.key-item::before,
+.score-card::before,
+.design-focus-point::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(217,130,112,.75), rgba(216,183,111,.58), transparent);
+}
+
+.flow-step {
+  min-height: 108px;
+  padding: 17px 16px 15px;
+}
+
+.flow-step b,
+.concept-node b,
+.decision-item b,
+.key-item b,
+.score-card b,
+.design-focus-point b {
+  color: #332d28;
+  font-weight: 950;
+}
+
+.flow-step span,
+.concept-node span,
+.decision-item span,
+.key-item span,
+.score-card span,
+.design-focus-point span {
+  color: #655c53;
+  font-size: 13px;
+  line-height: 1.62;
+}
+
+.method-meta > div {
+  padding: 11px 12px;
+  line-height: 1.62;
+}
+
+.method-meta b {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 5px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--accent-deep);
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+.tag-group {
+  border-color: rgba(207, 188, 166, 0.94);
+  box-shadow: 0 9px 22px rgba(73,50,28,.045);
+}
+
+.tag-group-head {
+  padding-bottom: 13px;
+  border-bottom: 1px solid rgba(223,208,189,.78);
+}
+
+.keyword-tag {
+  min-height: 36px;
+  padding: 7px 13px;
+  background: rgba(255,255,255,.78);
+  border-color: rgba(214,196,176,.92);
+}
+
+.keyword-tag.design {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.44), 0 5px 14px rgba(168,91,77,.055);
+}
+
+.practice-path {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 720px) {
+  .card { padding: 20px; }
+  .card li { padding-left: 32px; }
+  .flow-step { min-height: auto; }
+}
+
+
+/* ===== 2026-07 布局与排版统一修正 ===== */
+:root {
+  --max: 1680px;
+  --content-gap: clamp(14px, 1.4vw, 20px);
+}
+
+html { scroll-padding-top: 104px; }
+
+body {
+  line-height: 1.72;
+  overflow-x: hidden;
+}
+
+.page {
+  width: min(var(--max), calc(100% - 48px));
+  padding-bottom: 84px;
+}
+
+@media (min-width: 1800px) {
+  :root { --max: 1760px; }
+  .page { width: min(var(--max), calc(100% - 72px)); }
+}
+
+section[id] { scroll-margin-top: 104px; }
+
+h1, h2, h3,
+.visual-title,
+.flow-step b,
+.concept-node b,
+.decision-item b,
+.key-item b,
+.score-card b,
+.design-focus-point b,
+.mini b,
+.compare-side b {
+  text-wrap: balance;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+p, li, .section-desc, .hero-lead { text-wrap: pretty; }
+
+.topbar {
+  top: 12px;
+  min-height: 64px;
+  padding: 11px 16px 11px 14px;
+  border-radius: 24px;
+}
+
+.brand { flex: 0 0 auto; }
+.brand-mark { width: 38px; height: 38px; }
+
+.nav {
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a { flex: 0 0 auto; }
+
+.hero {
+  min-height: 560px;
+  grid-template-columns: minmax(0, 1.06fr) minmax(380px, .94fr);
+  gap: clamp(30px, 4.5vw, 70px);
+  padding: clamp(42px, 5.2vw, 72px);
+}
+
+h1 {
+  max-width: none;
+  margin: 22px 0 20px;
+  font-size: clamp(52px, 6.2vw, 92px);
+  line-height: 1.02;
+  letter-spacing: -.055em;
+}
+
+.hero-lead {
+  max-width: 720px;
+  font-size: clamp(17px, 1.3vw, 21px);
+  line-height: 1.82;
+}
+
+.hero-visual { min-width: 0; }
+.visual-card { padding: clamp(20px, 2vw, 26px); }
+.visual-card.large { min-height: 250px; }
+.visual-title {
+  max-width: none;
+  margin: 12px 0 12px;
+  font-size: clamp(30px, 2.65vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -.045em;
+}
+
+.mini-grid { gap: 10px; }
+.mini { min-width: 0; min-height: 112px; }
+.mini b { font-size: 17px; }
+
+.section { padding-top: clamp(58px, 6vw, 88px); }
+.section-shell { padding: clamp(28px, 3.6vw, 48px); }
+
+.section-head {
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr);
+  gap: clamp(24px, 3vw, 44px);
+  align-items: end;
+  margin-bottom: clamp(28px, 3vw, 44px);
+}
+
+.section h2 {
+  max-width: none;
+  font-size: clamp(36px, 4vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -.052em;
+}
+
+.section-desc {
+  max-width: 42ch;
+  justify-self: end;
+  font-size: clamp(16px, 1.2vw, 19px);
+  line-height: 1.82;
+}
+
+.cards-2, .cards-3, .cards-4,
+.matrix, .intervention-grid,
+.timeline, .flow-steps, .flow-steps.ai,
+.key-grid, .decision-board, .score-grid,
+.lesson-metrics, .time-plan,
+.tag-group-grid, .design-focus-points {
+  gap: var(--content-gap);
+  align-items: stretch;
+}
+
+.cards-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.matrix { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.intervention-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.cards-2 > *, .cards-3 > *, .cards-4 > *,
+.matrix > *, .intervention-grid > *, .timeline > * { height: 100%; min-width: 0; }
+
+.card,
+.flow-card,
+.step,
+.prompt-card,
+.table-card,
+.example-card,
+.lesson-panel,
+.teach-note,
+.question-box,
+.summary-box,
+.demo-script,
+.warning-box,
+.formula-box {
+  min-width: 0;
+}
+
+.card {
+  min-height: 0;
+  padding: 22px;
+}
+.intervention-grid .card { min-height: 0; }
+.card h3 {
+  min-height: 0;
+  font-size: clamp(20px, 1.45vw, 26px);
+  line-height: 1.3;
+}
+.card p { font-size: 14px; }
+.card li {
+  min-height: 0;
+  padding: 10px 12px 10px 32px;
+}
+.card li::before {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.marker, .pill, .keyword-tag, .ai-tool-chip,
+.section-tag, .flow-tag, .card-kicker, .step-num,
+.prompt-token, .annotation-legend span {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.marker { flex: 0 0 auto; }
+.pills, .marker-row, .tag-cloud, .annotation-legend { align-items: center; }
+
+.flow-title {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.flow-title h3 {
+  flex: 1 1 320px;
+  min-width: 0;
+  line-height: 1.24;
+}
+.flow-tag {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.flow-steps { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.flow-steps.ai { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.flow-step { min-width: 0; min-height: 104px; }
+.flow-step b { font-size: 15px; line-height: 1.4; }
+
+.concept-line { gap: 12px; }
+.concept-node { min-width: 0; min-height: 112px; }
+
+.tag-group-head h3 { max-width: 18ch; }
+.tag-group-head p { max-width: 38ch; }
+.keyword-tag { max-width: 100%; }
+
+.compare-row {
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  gap: 12px;
+}
+.compare-side { min-width: 0; }
+
+.table-row,
+.ai-tool-row { min-width: 0; }
+.table-row > div,
+.ai-tool-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.table-row { grid-template-columns: minmax(110px, .65fr) minmax(0, 1.45fr) minmax(110px, .65fr); }
+.ai-tool-row { grid-template-columns: minmax(130px, .72fr) minmax(220px, 1.25fr) minmax(220px, 1.18fr) minmax(220px, 1.15fr); }
+
+.prompt-sample { overflow-wrap: anywhere; }
+
+.btn, .nav a, .example-link {
+  outline-offset: 3px;
+}
+.btn:focus-visible, .nav a:focus-visible, .example-link:focus-visible {
+  outline: 3px solid rgba(145, 164, 202, .5);
+}
+
+@media (max-width: 1260px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-content { max-width: 920px; }
+  .hero-visual { max-width: none; }
+  .visual-title { max-width: 18ch; }
+
+  .cards-4, .matrix, .intervention-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow-steps, .flow-steps.ai { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .concept-line { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .concept-node:not(:last-child)::after { display: none; }
+  .time-plan { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ai-tool-row { grid-template-columns: minmax(120px, .72fr) minmax(180px, 1.1fr) minmax(180px, 1fr) minmax(180px, 1fr); }
+}
+
+@media (max-width: 980px) {
+  .page { width: min(100% - 28px, var(--max)); }
+  .topbar {
+    position: sticky;
+    top: 8px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 20px;
+  }
+  .brand span:last-child { display: none; }
+  .nav { justify-content: flex-start; }
+
+  .hero { padding: 38px 26px; }
+  h1 { max-width: 11ch; font-size: clamp(44px, 10vw, 74px); }
+
+  .section-head,
+  .showcase-grid,
+  .task-grid,
+  .lesson-overview,
+  .module-footer,
+  .design-focus { grid-template-columns: 1fr; }
+  .section-desc { max-width: 62ch; justify-self: start; }
+
+  .cards-2, .cards-3, .cards-4,
+  .timeline, .intervention-grid, .matrix,
+  .mini-grid, .tag-group-grid,
+  .lesson-metrics, .key-grid, .decision-board,
+  .score-grid, .design-focus-points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-steps, .flow-steps.ai { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .concept-line { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .time-plan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .section-shell { padding: 26px; }
+  .compare-row { grid-template-columns: 1fr; }
+  .vs { min-height: 28px; }
+
+  .table-row { grid-template-columns: minmax(110px, .65fr) minmax(0, 1.45fr) minmax(110px, .65fr); }
+
+  .ai-tool-row,
+  .ai-tool-row.header { grid-template-columns: 1fr; }
+  .ai-tool-row.header { display: none; }
+}
+
+@media (max-width: 720px) {
+  html { scroll-padding-top: 84px; }
+  .page { width: min(100% - 28px, var(--max)); padding-top: 14px; }
+  .topbar { min-height: 56px; padding: 8px 10px; }
+  .brand-mark { width: 36px; height: 36px; }
+  .nav a { padding: 7px 9px; font-size: 12px; }
+
+  .hero { padding: 32px 20px; border-radius: 24px; }
+  .hero::after { bottom: -12px; }
+  .eyebrow { font-size: 11px; letter-spacing: .055em; }
+  h1 { max-width: none; font-size: clamp(42px, 13vw, 62px); }
+  .hero-lead { font-size: 16px; line-height: 1.75; }
+  .hero-actions { margin-top: 26px; }
+  .btn { width: 100%; }
+  .visual-card { padding: 20px; }
+  .visual-title { max-width: none; font-size: clamp(27px, 8vw, 38px); }
+
+  .section { padding-top: 54px; }
+  .section-shell { padding: 22px 18px; border-radius: 24px; }
+  .section h2 { max-width: none; font-size: clamp(32px, 9.5vw, 46px); }
+  .section-desc { font-size: 16px; }
+
+  .cards-2, .cards-3, .cards-4,
+  .timeline, .intervention-grid, .matrix,
+  .mini-grid, .tag-group-grid,
+  .lesson-metrics, .key-grid, .decision-board,
+  .score-grid, .design-focus-points,
+  .flow-steps, .flow-steps.ai,
+  .concept-line, .time-plan,
+  .method-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .card, .flow-card, .step, .prompt-card, .table-card, .example-card,
+  .lesson-panel, .teach-note, .question-box, .summary-box,
+  .demo-script, .warning-box, .formula-box { padding: 18px; }
+
+  .flow-title { margin-bottom: 14px; }
+  .flow-title h3 { flex-basis: 100%; }
+  .flow-tag { width: 100%; }
+  .flow-step { min-height: 0; }
+
+  .tag-group-head { flex-direction: row; align-items: flex-start; }
+  .tag-group-head h3 { max-width: none; }
+  .keyword-tag, .ai-tool-chip { white-space: normal; }
+
+  .table-row,
+  .table-row.header { grid-template-columns: 1fr; }
+  .table-row.header { display: none; }
+  .table-row > div::before {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--accent-deep);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .08em;
+  }
+  .table-row > div::before { content: attr(data-label); }
+
+  .final-cta { padding: 38px 20px; border-radius: 24px; }
+  .final-cta h2 { font-size: clamp(32px, 9.2vw, 48px); }
+}
+
+@media (max-width: 420px) {
+  .nav a { font-size: 11px; }
+  .section-tag { white-space: normal; }
+  .marker, .pill { white-space: normal; }
+}
+
+    /* 最终统一字体规则：以 48px 为一级标题基准 */
+    *,*::before,*::after{font-size:inherit !important;line-height:inherit !important}
+    body{font-size:16px !important;line-height:1.6 !important}
+    h1{font-size:64px !important;line-height:1.12 !important}
+    h2{font-size:40px !important;line-height:1.2 !important}
+    h3{font-size:28px !important;line-height:1.25 !important}
+    h4{font-size:22px !important;line-height:1.3 !important}
+    h5,h6{font-size:20px !important;line-height:1.35 !important}
+    p,li,td,th,label,button,input,textarea,select{font-size:16px !important;line-height:1.6 !important}
+    small,.caption,.eyebrow,.section-tag,.card-kicker,.visual-kicker,.flow-tag,.pill,.nav a{font-size:14px !important;line-height:1.45 !important}
+    @media (max-width:620px){h1{font-size:40px !important}h2{font-size:30px !important}h3{font-size:22px !important}h4{font-size:18px !important}}
+</style></head><body>
+<div class="page">
+<header class="topbar">
+<div class="brand"><span>GPT UI 图像生成基础</span></div>
+<nav aria-label="页面导航" class="nav">
+<a href="#model">模型介绍</a>
+<a href="#applications">生成范围</a>
+<a href="#methods">生成方式</a>
+<a href="#workflow">工作流程</a>
+<a href="#prompt">Prompt</a>
+<a href="#evaluation">评估优化</a>
+<a href="#practice">实践任务</a>
+</nav>
+</header>
+<section class="hero" id="top">
+<div class="hero-content">
+<div class="eyebrow">GPT IMAGE GENERATION</div>
+<h1>GPT 生成 UI<br/>图像基础</h1>
+<p class="hero-lead">
+          从认识生图模型、建立图像类型地图，到掌握四种生成方式、结构化 Prompt、结果评估与实践应用，
+          完成从“会生成图片”到“能用 AI 辅助设计”的方法升级。
+        </p>
+<div class="hero-actions">
+<a class="btn btn-primary" href="#model">开始学习</a>
+<a class="btn btn-secondary" href="#practice">查看实践任务</a>
+</div>
+</div>
+<div class="hero-visual">
+<div class="visual-card large">
+<div>
+<div class="visual-kicker">COURSE LOGIC</div>
+<div class="visual-title">理解能力 → 选择方法<br/>控制生成 → 设计落地</div>
+<p>重点不以“生成一张好看的图”为终点，而是训练需求表达、变量控制、方案比较和设计转化。</p>
+</div>
+<div class="pills">
+<span class="pill">模型边界</span>
+<span class="pill">图像类型</span>
+<span class="pill">生成方法</span>
+<span class="pill">Prompt 结构</span>
+<span class="pill">评价标准</span>
+</div>
+</div>
+<div class="mini-grid">
+<div class="mini"><b>看懂</b><span>知道 GPT 如何理解文字、截图、草图与参考图。</span></div>
+<div class="mini"><b>会用</b><span>能根据任务选择文生图、图生图、参考图或草图生图。</span></div>
+<div class="mini"><b>会判断</b><span>能区分概念图、设计参考和最终可交付设计稿。</span></div>
+</div>
+</div>
+</section>
+<main>
+<section class="section" id="model">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">01 / GPT IMAGE MODEL</span>
+<h2>GPT 生图模型：不是“自动画图软件”，而是能够理解上下文的视觉协作者。</h2>
+</div>
+<p class="section-desc">
+              模型会把文字、图片和对话中的要求转换为视觉结果。它能做生成，也能做编辑和多轮修改；但模型输出是概率结果，不天然等于正确设计。
+            </p>
+</div>
+<div class="flow-card">
+<div class="flow-title">
+<h3>先理解模型的工作逻辑</h3>
+<span class="flow-tag">Input → Understanding → Generation → Review</span>
+</div>
+<div class="concept-line">
+<div class="concept-node"><b>输入信息</b><span>文字需求、截图、草图、参考图、品牌资料和修改反馈。</span></div>
+<div class="concept-node"><b>语义理解</b><span>识别任务、对象、场景、视觉风格、布局和限制条件。</span></div>
+<div class="concept-node"><b>视觉生成</b><span>组合构图、颜色、材质、光影、文字区域和界面元素。</span></div>
+<div class="concept-node"><b>对话修改</b><span>根据反馈保留有效部分，并修改局部或整体方向。</span></div>
+<div class="concept-node"><b>人工判断</b><span>检查目标、逻辑、可读性、一致性、真实性和可落地性。</span></div>
+</div>
+</div>
+<div class="cards-4" style="margin-top:18px;">
+<div class="card">
+<span class="card-kicker">CAPABILITY 01</span>
+<h3>自然语言理解</h3>
+<ul>
+<li>理解产品类型、页面目标、用户场景和核心任务。</li>
+<li>把“简洁、可信、年轻、科技”等抽象词转换成视觉特征。</li>
+<li>理解“保留结构、降低装饰、突出主按钮”等修改要求。</li>
+</ul>
+<div class="marker-row"><span class="marker">需求</span><span class="marker">语义</span><span class="marker">修改意图</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">CAPABILITY 02</span>
+<h3>多模态理解</h3>
+<ul>
+<li>读取截图、线框图、手绘草图、摄影图和设计参考。</li>
+<li>分析画面结构、模块位置、色彩气质、材质和视觉焦点。</li>
+<li>比较多张参考图，并抽取可组合的共同特征。</li>
+</ul>
+<div class="marker-row"><span class="marker blue">截图</span><span class="marker blue">草图</span><span class="marker blue">参考图</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">CAPABILITY 03</span>
+<h3>图像生成与编辑</h3>
+<ul>
+<li>从文字生成 UI 概念、海报、插画、场景和素材。</li>
+<li>对已有画面做扩图、换背景、替换元素和风格转换。</li>
+<li>围绕同一主题生成多种构图、配色和质感方向。</li>
+</ul>
+<div class="marker-row"><span class="marker sage">生成</span><span class="marker sage">编辑</span><span class="marker sage">变体</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">CAPABILITY 04</span>
+<h3>设计协作</h3>
+<ul>
+<li>帮助团队快速看到尚未制作的视觉方向。</li>
+<li>把沟通中的抽象描述转成可比较的方案。</li>
+<li>为 Figma 重建、素材制作和页面精修提供参考。</li>
+</ul>
+<div class="marker-row"><span class="marker yellow">探索</span><span class="marker yellow">沟通</span><span class="marker yellow">验证</span></div>
+</div>
+</div>
+<div class="cards-2" style="margin-top:18px;">
+<div class="card">
+<h3>更适合交给 GPT 的任务</h3>
+<ul>
+<li>把模糊想法快速变成第一版可视化方向。</li>
+<li>在短时间内生成多种风格、构图和素材变体。</li>
+<li>对局部区域进行替换、扩展、补充和风格统一。</li>
+<li>帮助团队讨论“方向是否值得继续”。</li>
+</ul>
+</div>
+<div class="card">
+<h3>必须由设计师负责的任务</h3>
+<ul>
+<li>判断产品目标、用户需求和业务优先级。</li>
+<li>建立真实的信息架构、交互路径和组件状态。</li>
+<li>校正文案、数据、品牌规范和实现逻辑。</li>
+<li>把概念图重建为可编辑、可复用、可开发的设计稿。</li>
+</ul>
+</div>
+</div>
+<div class="module-footer">
+<div class="warning-box">
+<h3>不要把“看起来像 UI”当成“真正的 UI”</h3>
+<p>生成图可能拥有漂亮的卡片和按钮，但文字可能错误、状态可能缺失、控件可能无法交互。需要注意：视觉相似不代表结构真实。</p>
+</div>
+<div class="question-box">
+<h3>快速提问</h3>
+<p>一张生成的 App 首页很漂亮，但按钮含义不清、数据无法解释，它属于视觉概念、UI 参考还是最终设计稿？为什么？</p>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="applications">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">02 / IMAGE GENERATION ATLAS</span>
+<h2>GPT 可以生成哪些图：先认识广度，再聚焦与设计工作直接相关的输出。</h2>
+</div>
+<p class="section-desc">
+              生图任务可以按“题材、艺术风格、应用载体和专业行业”分类。普通标签表示通用题材或风格；带有 <span class="highlight">✦ 高亮</span> 的标签表示可进入设计流程的任务。
+            </p>
+</div>
+<div class="tag-atlas">
+<div class="tag-legend">
+<div class="tag-legend-copy">
+<strong>阅读方法：</strong>先看“生成什么内容”，再看“用于什么设计载体”。同一个视觉风格可以用于多个设计任务，例如“水彩插画”可以进入包装、海报、文创和品牌活动视觉。
+              </div>
+<div aria-label="标签说明" class="legend-items">
+<span class="legend-label">图例</span>
+<span class="keyword-tag sample">通用生图方向</span>
+<span class="keyword-tag design sample">设计相关输出</span>
+</div>
+</div>
+<div class="tag-group-grid">
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>人物、生活与内容题材</h3><p>用于人物设定、摄影内容、生活方式和商品氛围。</p></div><span class="tag-index">A</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag">写实人像</span><span class="keyword-tag">二次元动漫</span><span class="keyword-tag">古风汉服</span><span class="keyword-tag">婚纱写真</span><span class="keyword-tag">潮流人物</span><span class="keyword-tag">动物萌宠</span><span class="keyword-tag">美食特写</span><span class="keyword-tag">室内家居</span><span class="keyword-tag">静物摆件</span><span class="keyword-tag">生活方式摄影</span><span class="keyword-tag">旅行纪实</span><span class="keyword-tag">虚拟偶像</span><span class="keyword-tag">儿童绘本角色</span><span class="keyword-tag design">商品场景图</span><span class="keyword-tag design">摄影布景方案</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>艺术风格与视觉语言</h3><p>用于控制媒介、材质、时代感、氛围和表现方式。</p></div><span class="tag-index">B</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag">赛博朋克</span><span class="keyword-tag">水彩插画</span><span class="keyword-tag">油画厚涂</span><span class="keyword-tag">像素风</span><span class="keyword-tag">3D 渲染</span><span class="keyword-tag">卡通 Q 版</span><span class="keyword-tag">极简扁平</span><span class="keyword-tag">复古胶片</span><span class="keyword-tag">暗黑哥特</span><span class="keyword-tag">治愈温柔</span><span class="keyword-tag">蒸汽朋克</span><span class="keyword-tag">水墨丹青</span><span class="keyword-tag">国风山水</span><span class="keyword-tag">黏土质感</span><span class="keyword-tag">玻璃拟态</span><span class="keyword-tag">纸雕风格</span><span class="keyword-tag">低多边形</span><span class="keyword-tag">未来科技</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>自然、城市与幻想场景</h3><p>用于世界观、环境氛围、背景素材和叙事空间。</p></div><span class="tag-index">C</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag">自然风光</span><span class="keyword-tag">城市夜景</span><span class="keyword-tag">科幻场景</span><span class="keyword-tag">森系田园</span><span class="keyword-tag">仙侠玄幻</span><span class="keyword-tag">机甲机械</span><span class="keyword-tag">古代建筑</span><span class="keyword-tag">未来城市</span><span class="keyword-tag">太空宇宙</span><span class="keyword-tag">海底世界</span><span class="keyword-tag">奇幻森林</span><span class="keyword-tag">末日废土</span><span class="keyword-tag design">概念原画</span><span class="keyword-tag design">场景氛围设定</span><span class="keyword-tag design">故事分镜概念</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>品牌、平面与视觉传达</h3><p>具有明确传播目的、视觉载体和品牌规范。</p></div><span class="tag-index">D</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag design">品牌 LOGO</span><span class="keyword-tag design">VI 视觉系统</span><span class="keyword-tag design">品牌辅助图形</span><span class="keyword-tag design">国潮纹样</span><span class="keyword-tag design">字体设计</span><span class="keyword-tag design">版式排版</span><span class="keyword-tag design">海报主视觉</span><span class="keyword-tag design">海报版式</span><span class="keyword-tag design">活动主视觉</span><span class="keyword-tag design">宣传单页</span><span class="keyword-tag design">画册封面</span><span class="keyword-tag design">画册内页</span><span class="keyword-tag design">封面装帧</span><span class="keyword-tag design">名片卡片</span><span class="keyword-tag design">菜单设计</span><span class="keyword-tag design">菜单版式</span><span class="keyword-tag design">展架展板</span><span class="keyword-tag design">展板背景</span><span class="keyword-tag design">PPT 版式</span><span class="keyword-tag design">数据可视化图表</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>数字产品、电商与运营设计</h3><p>与网站、App、营销转化和内容运营直接相关。</p></div><span class="tag-index">E</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag design">UI 界面</span><span class="keyword-tag design">APP 界面</span><span class="keyword-tag design">小程序界面</span><span class="keyword-tag design">网页界面</span><span class="keyword-tag design">Dashboard</span><span class="keyword-tag design">图标 icon</span><span class="keyword-tag design">组件视觉</span><span class="keyword-tag design">启动页</span><span class="keyword-tag design">空状态插画</span><span class="keyword-tag design">电商主图</span><span class="keyword-tag design">详情页版式</span><span class="keyword-tag design">Banner 广告</span><span class="keyword-tag design">信息流广告</span><span class="keyword-tag design">样机贴图</span><span class="keyword-tag design">运营活动页</span><span class="keyword-tag design">社媒封面</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>包装、IP、文创与物料延展</h3><p>从核心视觉延展到可生产、可传播的品牌物料。</p></div><span class="tag-index">F</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag design">包装设计</span><span class="keyword-tag design">手袋礼盒</span><span class="keyword-tag design">手提袋</span><span class="keyword-tag design">贴纸</span><span class="keyword-tag design">标签吊牌</span><span class="keyword-tag design">文创周边</span><span class="keyword-tag design">物料延展</span><span class="keyword-tag design">IP 形象</span><span class="keyword-tag design">表情包</span><span class="keyword-tag design">潮玩手办</span><span class="keyword-tag design">吉祥物</span><span class="keyword-tag design">礼赠品视觉</span><span class="keyword-tag design">包装纹样</span><span class="keyword-tag design">包装效果图</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>服装、产品与工业设计</h3><p>用于外观探索、材质方向、结构草案和展示效果。</p></div><span class="tag-index">G</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag design">服装款式图</span><span class="keyword-tag design">面料纹样</span><span class="keyword-tag design">首饰设计</span><span class="keyword-tag design">工业产品草图</span><span class="keyword-tag design">产品外观建模</span><span class="keyword-tag design">产品 CMF 方案</span><span class="keyword-tag design">产品爆炸图概念</span><span class="keyword-tag design">产品陈列图</span><span class="keyword-tag design">鞋服配色方案</span><span class="keyword-tag design">机甲结构概念</span><span class="keyword-tag design">潮玩造型设计</span><span class="keyword-tag design">产品渲染图</span>
+</div>
+</article>
+<article class="tag-group">
+<div class="tag-group-head"><div><h3>空间、展陈与环境设计</h3><p>用于空间风格、动线、软装、展陈和商业环境预览。</p></div><span class="tag-index">H</span></div>
+<div class="tag-cloud">
+<span class="keyword-tag design">工装效果图</span><span class="keyword-tag design">家装效果图</span><span class="keyword-tag design">家装施工图效果图</span><span class="keyword-tag design">工装展厅</span><span class="keyword-tag design">展厅展台</span><span class="keyword-tag design">商业空间平面布局</span><span class="keyword-tag design">软装搭配</span><span class="keyword-tag design">导视系统</span><span class="keyword-tag design">门头招牌</span><span class="keyword-tag design">灯箱广告</span><span class="keyword-tag design">店铺陈列</span><span class="keyword-tag design">快闪店概念</span><span class="keyword-tag design">展会空间概念</span><span class="keyword-tag design">空间材质方案</span>
+</div>
+</article>
+</div>
+</div>
+<div class="design-focus">
+<div class="design-focus-main">
+<h3>如何判断“设计相关”？</h3>
+<p>重点不在画面是否漂亮，而在它是否具有明确目标、载体、规则和后续加工流程。</p>
+<div class="design-focus-points">
+<div class="design-focus-point"><b>有目标</b><span>传播、转化、识别、操作、展示或空间体验。</span></div>
+<div class="design-focus-point"><b>有载体</b><span>页面、包装、海报、产品、空间、物料或印刷品。</span></div>
+<div class="design-focus-point"><b>有约束</b><span>尺寸、品牌、内容、工艺、交互、成本或施工条件。</span></div>
+<div class="design-focus-point"><b>有后续</b><span>需要进入 Figma、建模、排版、打样、开发或施工。</span></div>
+<div class="design-focus-point"><b>可评估</b><span>能用功能、识别、可读、统一和落地标准判断。</span></div>
+<div class="design-focus-point"><b>可迭代</b><span>能够根据反馈修改结构、信息、风格和细节。</span></div>
+</div>
+</div>
+<div class="design-caution">
+<h3>高亮标签 ≠ 一键完成专业设计</h3>
+<p>GPT 更适合生成方向、概念和视觉参考。以下任务必须继续专业加工：</p>
+<ul class="caution-list">
+<li><b>LOGO / VI：</b>检查独特性、注册风险、网格、黑白稿和应用规范。</li>
+<li><b>UI / App：</b>重建真实组件、状态、交互、适配和无障碍规则。</li>
+<li><b>包装 / 印刷：</b>补充刀版、出血、文字信息、材质和印刷工艺。</li>
+<li><b>空间 / 施工：</b>核对真实尺寸、结构、安全规范、材料与预算。</li>
+<li><b>数据图表：</b>使用真实数据，保证编码方式、单位和结论准确。</li>
+</ul>
+</div>
+</div>
+<div class="table-card" style="margin-top:18px;">
+<h3>从“生成标签”到“设计任务”的转换</h3>
+<div class="compare-table">
+<div class="table-row header"><div>生成方向</div><div>适合快速探索</div><div>后续设计动作</div></div>
+<div class="table-row"><div data-label="生成方向">赛博朋克 + UI 界面</div><div data-label="适合快速探索">快速探索科技产品的色彩、材质和氛围。</div><div data-label="后续设计动作">降低装饰密度，重建导航、数据层级和组件状态。</div></div>
+<div class="table-row"><div data-label="生成方向">水彩插画 + 包装设计</div><div data-label="适合快速探索">建立包装插画的风格和主视觉构图。</div><div data-label="后续设计动作">完成品牌信息、刀版、印刷色和系列化规则。</div></div>
+<div class="table-row"><div data-label="生成方向">3D 渲染 + 电商主图</div><div data-label="适合快速探索">生成产品场景、灯光和促销氛围方向。</div><div data-label="后续设计动作">替换真实商品、校正结构、补充价格与卖点信息。</div></div>
+<div class="table-row"><div data-label="生成方向">极简扁平 + 数据图表</div><div data-label="适合快速探索">探索图表配色、卡片布局和仪表盘风格。</div><div data-label="后续设计动作">导入真实数据，校准比例、标签、单位和交互方式。</div></div>
+</div>
+</div>
+<div class="module-footer">
+<div class="summary-box"><h3>模块记忆点</h3><p>“题材词”决定画什么，“风格词”决定怎么画，“设计载体词”决定画面最终要进入什么工作流程。</p></div>
+<div class="question-box"><h3>思考一下</h3><p>“国风山水”和“国风山水包装设计”有什么区别？后者还必须补充哪些品牌、尺寸、信息和工艺条件？</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="methods">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">03 / GENERATION METHODS</span>
+<h2>四种常用生成方式：输入依据不同，控制程度、适用阶段和风险也不同。</h2>
+</div>
+<p class="section-desc">选择生成方式时，先判断你手上已经有什么：只有想法、已有画面、明确参考，还是已经画好的布局草图。</p>
+</div>
+<div class="cards-4">
+<div class="card">
+<span class="card-kicker">TEXT TO IMAGE</span>
+<h3>文生图</h3>
+<p>只用文字描述生成新画面，最适合从零探索方向。</p>
+<div class="method-meta">
+<div><b>输入</b>需求、内容、风格、构图和约束。</div>
+<div><b>适用</b>灵感发散、首轮概念、多风格比较。</div>
+<div><b>优点</b>自由度高、起步快、适合大量变体。</div>
+<div><b>风险</b>结构漂移、文字错误、结果不稳定。</div>
+</div>
+<div class="marker-row"><span class="marker">从零开始</span><span class="marker">方向探索</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">IMAGE TO IMAGE</span>
+<h3>图生图</h3>
+<p>上传已有画面，在保留部分内容的基础上修改或重绘。</p>
+<div class="method-meta">
+<div><b>输入</b>截图、照片、已有设计稿或生成图。</div>
+<div><b>适用</b>换风格、扩图、局部替换、视觉升级。</div>
+<div><b>优点</b>比纯文字更容易保持主体和构图。</div>
+<div><b>风险</b>原图错误可能被继续放大或扭曲。</div>
+</div>
+<div class="marker-row"><span class="marker blue">已有画面</span><span class="marker blue">定向修改</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">REFERENCE GUIDED</span>
+<h3>参考图生成</h3>
+<p>使用一张或多张参考图控制布局、风格、材质或氛围。</p>
+<div class="method-meta">
+<div><b>输入</b>布局参考、风格参考、品牌或材质参考。</div>
+<div><b>适用</b>对齐审美、控制气质、统一系列资产。</div>
+<div><b>优点</b>目标更直观，团队沟通成本更低。</div>
+<div><b>风险</b>过度接近参考，产生抄袭和版权问题。</div>
+</div>
+<div class="marker-row"><span class="marker yellow">风格控制</span><span class="marker yellow">布局控制</span></div>
+</div>
+<div class="card">
+<span class="card-kicker">SKETCH TO IMAGE</span>
+<h3>草图生图</h3>
+<p>把线框、手绘或低保真结构转换为更完整的视觉方案。</p>
+<div class="method-meta">
+<div><b>输入</b>线框图、手绘草图、灰度原型或构图框架。</div>
+<div><b>适用</b>固定模块位置、验证布局、从原型到视觉。</div>
+<div><b>优点</b>最容易保留设计师预先确定的结构。</div>
+<div><b>风险</b>结构过于粗糙时，模型会自行补充错误内容。</div>
+</div>
+<div class="marker-row"><span class="marker sage">结构优先</span><span class="marker sage">原型升级</span></div>
+</div>
+</div>
+<div class="table-card" style="margin-top:18px;">
+<h3>四种方式对比表</h3>
+<div class="compare-table">
+<div class="table-row header"><div>方式</div><div>最适合的问题</div><div>控制重点</div></div>
+<div class="table-row"><div data-label="方式">文生图</div><div data-label="最适合的问题">“我只有一个想法，想先看到可能性。”</div><div data-label="控制重点">把任务、结构、风格和约束说完整。</div></div>
+<div class="table-row"><div data-label="方式">图生图</div><div data-label="最适合的问题">“我已经有画面，只想改一部分。”</div><div data-label="控制重点">明确保留项、修改项和禁止改变项。</div></div>
+<div class="table-row"><div data-label="方式">参考图生成</div><div data-label="最适合的问题">“我知道想要的气质，但不想照搬。”</div><div data-label="控制重点">说明参考的是布局、配色、材质还是情绪。</div></div>
+<div class="table-row"><div data-label="方式">草图生图</div><div data-label="最适合的问题">“页面结构已确定，需要视觉化。”</div><div data-label="控制重点">保持模块关系、信息层级和关键区域。</div></div>
+</div>
+</div>
+<div class="flow-card" style="margin-top:18px;">
+<div class="flow-title"><h3>一分钟选择方法</h3><span class="flow-tag">先看已有输入</span></div>
+<div class="decision-board">
+<div class="decision-item"><small>只有文字想法</small><b>选文生图</b><span>先广泛发散，再逐步增加约束。</span></div>
+<div class="decision-item"><small>已有图片需要修改</small><b>选图生图</b><span>写清保留区域和修改区域。</span></div>
+<div class="decision-item"><small>已有审美参考</small><b>选参考图生成</b><span>拆解参考特征，不直接复制成品。</span></div>
+<div class="decision-item"><small>已有布局草图</small><b>选草图生图</b><span>锁定结构，再探索风格和质感。</span></div>
+</div>
+</div>
+<div class="module-footer">
+<div class="teach-note"><h3>对比示例</h3><p>使用同一个“健康 App 首页”任务，依次演示四种方式。可以重点观察：输入越具体，结构越稳定；但限制越多，意外创意也会减少。</p></div>
+<div class="summary-box"><h3>模块记忆点</h3><p>不是哪种方式“最好”，而是哪种方式最符合你当前拥有的资料和要解决的问题。</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="workflow">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">04 / UI GENERATION WORKFLOW</span>
+<h2>从需求到第一版 UI 概念图：生成不是一次完成，而是逐步缩小问题范围。</h2>
+</div>
+<p class="section-desc">高效工作流的核心是：先定义目标，再拆结构；先定大方向，再调整局部；最后把可用规律转成真实设计。</p>
+</div>
+<div class="flow-card">
+<div class="flow-title"><h3>GPT UI 图像生成 8 步流程</h3><span class="flow-tag">Brief → Figma</span></div>
+<div class="flow-steps">
+<div class="flow-step"><b>01 明确任务</b><span>产品、页面、用户、设备和核心目标。</span></div>
+<div class="flow-step"><b>02 拆解结构</b><span>页面区域、模块顺序、核心内容和状态。</span></div>
+<div class="flow-step"><b>03 建立基准</b><span>确定比例、风格、品牌气质和禁止项。</span></div>
+<div class="flow-step"><b>04 首轮生成</b><span>一次生成多个方向，不急着修细节。</span></div>
+<div class="flow-step"><b>05 比较筛选</b><span>用统一标准评估目标、结构和可读性。</span></div>
+<div class="flow-step"><b>06 定向修改</b><span>每轮只调整一个主要变量。</span></div>
+<div class="flow-step"><b>07 提取规律</b><span>记录可用布局、配色、组件和视觉语言。</span></div>
+<div class="flow-step"><b>08 设计重建</b><span>进入 Figma 建立真实内容、组件和状态。</span></div>
+</div>
+</div>
+<div class="cards-3" style="margin-top:18px;">
+<div class="card">
+<span class="card-kicker">BEFORE</span>
+<h3>生成前：把需求说清</h3>
+<ol class="detail-list">
+<li data-no="1">明确页面最重要的用户任务。</li>
+<li data-no="2">列出必须出现的内容和模块。</li>
+<li data-no="3">确定画布比例、设备和输出用途。</li>
+<li data-no="4">准备风格关键词与必要参考。</li>
+</ol>
+</div>
+<div class="card">
+<span class="card-kicker">DURING</span>
+<h3>生成中：控制变量</h3>
+<ol class="detail-list">
+<li data-no="1">首轮比较整体方向，不纠结小字。</li>
+<li data-no="2">固定结构，只改配色或材质。</li>
+<li data-no="3">固定风格，只改信息密度或模块。</li>
+<li data-no="4">明确哪些区域必须保持不变。</li>
+</ol>
+</div>
+<div class="card">
+<span class="card-kicker">AFTER</span>
+<h3>生成后：转成设计任务</h3>
+<ol class="detail-list">
+<li data-no="1">提取可用的布局规律与视觉语言。</li>
+<li data-no="2">校正文案、数据、图标和交互逻辑。</li>
+<li data-no="3">建立网格、组件、状态和响应式规则。</li>
+<li data-no="4">记录 Prompt、版本和取舍依据。</li>
+</ol>
+</div>
+</div>
+<div class="demo-script" style="margin-top:18px;">
+<h3>同一页面的三轮修改示例</h3>
+<div class="key-grid">
+<div class="key-item"><b>第 1 轮：定方向</b><span>只看是否符合“轻盈、可信、健康”的产品气质。</span></div>
+<div class="key-item"><b>第 2 轮：定结构</b><span>要求保留顶部问候、中部健康数据、底部任务区。</span></div>
+<div class="key-item"><b>第 3 轮：定密度</b><span>减少装饰，放大关键数据，强化主操作按钮。</span></div>
+<div class="key-item"><b>关键结论</b><span>每轮只解决一类问题，结果更容易比较和复盘。</span></div>
+</div>
+</div>
+<div class="compare-list" style="margin-top:18px;">
+<div class="compare-row">
+<div class="compare-side"><b>低效：不断重写整段 Prompt</b><span>每次同时改变布局、内容、风格和配色，无法判断哪个变量有效。</span></div>
+<div class="vs">VS</div>
+<div class="compare-side"><b>高效：固定主体，逐项微调</b><span>保留已经成立的部分，每轮只修改一个主要问题，并记录变化。</span></div>
+</div>
+</div>
+<div class="module-footer">
+<div class="warning-box"><h3>最常见的工作流错误</h3><p>一开始就要求“完整、精致、可交付”，会让模型同时处理太多目标。正确做法是先粗后细、先大后小、先方向后规则。</p></div>
+<div class="summary-box"><h3>流程口诀</h3><p>先目标，后结构；先多版，后选择；先大改，后小修；最后回到真实设计工具。</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="prompt">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">05 / PROMPT STRUCTURE</span>
+<h2>UI 图像 Prompt：把“想要好看”改写成模型可以执行的设计说明。</h2>
+</div>
+<p class="section-desc">一个可用的 Prompt 至少要回答：做什么、给谁用、包含什么、长什么样、输出多大、哪些问题不能出现。</p>
+</div>
+<div class="formula-box">
+<h3>推荐的 8 段式 Prompt 公式</h3>
+<p>可以写成连续自然语言，也可以分段列出。顺序不是绝对固定，但信息需要完整。</p>
+<div class="prompt-formula">
+<span class="prompt-token">任务</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">用户</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">目标</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">结构</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">内容</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">风格</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">输出</span><span class="prompt-plus">＋</span>
+<span class="prompt-token">约束</span>
+</div>
+</div>
+<div class="cards-4" style="margin-top:18px;">
+<div class="card"><span class="card-kicker">01–02</span><h3>任务与用户</h3><ul><li>产品类型：电商、教育、金融、健康、工具等。</li><li>页面类型：首页、详情页、Dashboard、登录页等。</li><li>目标用户：年龄、职业、经验和使用环境。</li></ul></div>
+<div class="card"><span class="card-kicker">03–04</span><h3>目标与结构</h3><ul><li>用户进入页面后最重要的任务是什么。</li><li>从上到下有哪些区域、模块和操作。</li><li>哪些信息必须第一眼看到，哪些属于辅助内容。</li></ul></div>
+<div class="card"><span class="card-kicker">05–06</span><h3>内容与风格</h3><ul><li>使用真实、简短、可读的文案和数据示例。</li><li>指定配色、材质、圆角、阴影、排版和品牌气质。</li><li>说明参考的是布局、氛围还是视觉语言。</li></ul></div>
+<div class="card"><span class="card-kicker">07–08</span><h3>输出与约束</h3><ul><li>手机 9:16、网页 16:9、1440px 桌面画布等。</li><li>要求清晰层级、合理留白和真实组件。</li><li>避免乱码、过度渐变、装饰堆叠和不可理解图标。</li></ul></div>
+</div>
+<div class="task-grid" style="margin-top:18px;">
+<div class="prompt-card">
+<h3>可复制的 Prompt 模板</h3>
+<div class="prompt-box">
+<div class="prompt-mini"><strong>任务</strong>为【产品类型】设计一张【页面类型】UI 概念图。</div>
+<div class="prompt-mini"><strong>用户与目标</strong>目标用户是【用户】，主要任务是【任务】。</div>
+<div class="prompt-mini"><strong>页面结构</strong>从上到下包含【区域 1】【区域 2】【区域 3】。</div>
+<div class="prompt-mini"><strong>内容</strong>使用【语言】真实示例文案，并展示【数据 / 状态 / 图片】。</div>
+<div class="prompt-mini"><strong>视觉方向</strong>整体呈现【气质】，使用【配色】【材质】【排版】。</div>
+<div class="prompt-mini"><strong>输出约束</strong>画布为【比例 / 尺寸】，避免【问题 1】【问题 2】。</div>
+</div>
+</div>
+<div class="example-card">
+<h3>标注示例：健康管理 App 首页</h3>
+<div class="prompt-sample">
+<mark>为年轻职场人设计一张健康管理 App 首页 UI 概念图</mark>，手机端 9:16。<mark>页面目标是让用户快速查看今日健康状态并开始运动任务</mark>。<mark class="structure">顶部包含问候语、头像和通知入口；中部展示步数、睡眠、心率三张数据卡片；下方提供今日训练、饮水提醒和健康建议</mark>。<mark class="style">整体使用低饱和绿色与米白色，简洁、轻盈、专业，圆角卡片、清晰信息层级、充足留白</mark>。使用简短中文文案，<mark class="constraint">避免乱码、过度渐变、过多装饰和无法理解的图标</mark>。
+              </div>
+<div class="annotation-legend">
+<span class="a">任务 / 用户 / 目标</span><span class="b">页面结构</span><span class="c">视觉风格</span><span class="d">限制条件</span>
+</div>
+</div>
+</div>
+<div class="cards-3" style="margin-top:18px;">
+<div class="card"><h3>比例参数</h3><ul><li>手机界面：9:16 或明确设备画布。</li><li>网页方案：16:9 或 1440px 桌面画布。</li><li>海报、Banner、电商主图要写具体用途与尺寸。</li></ul><div class="pills"><span class="pill">9:16</span><span class="pill">16:9</span><span class="pill">1440px</span></div></div>
+<div class="card"><h3>风格参数</h3><ul><li>不要只写“高级”，要拆成色彩、材质和排版。</li><li>例如：低饱和、无衬线、轻阴影、圆角 16px、Bento 布局。</li><li>风格词之间要相互兼容，避免矛盾堆叠。</li></ul></div>
+<div class="card"><h3>约束参数</h3><ul><li>避免乱码、错误图标、无意义数据和过密布局。</li><li>保留指定结构，不改变关键模块位置。</li><li>不要复制参考图的品牌标识和独特构图。</li></ul></div>
+</div>
+<div class="compare-list" style="margin-top:18px;">
+<div class="compare-row">
+<div class="compare-side"><b>模糊 Prompt</b><span>“生成一个高级、好看的健康 App 页面。”模型不知道用户、任务、结构、比例和评价标准。</span></div>
+<div class="vs">VS</div>
+<div class="compare-side"><b>结构化 Prompt</b><span>明确页面目标、模块顺序、真实内容、视觉语言、输出比例和禁止项。</span></div>
+</div>
+</div>
+<div class="module-footer">
+<div class="warning-box"><h3>Prompt 不是关键词堆砌</h3><p>“极简、赛博、复古、柔和、奢华、卡通”同时出现会产生冲突。风格词要围绕同一设计目标，并转化为具体视觉规则。</p></div>
+<div class="question-box"><h3>Prompt 改写练习</h3><p>把“做一个高级的咖啡 App”改写为包含任务、用户、结构、风格、比例和约束的完整 Prompt。</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="evaluation">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">06 / EVALUATION &amp; ITERATION</span>
+<h2>生成之后如何判断：不只选“最好看”，而是选最符合目标、最值得继续的方向。</h2>
+</div>
+<p class="section-desc">评价标准越具体，修改指令越有效。先检查目标和结构，再看视觉细节；先解决大问题，再修小问题。</p>
+</div>
+<div class="score-grid">
+<div class="score-card"><span class="score">20</span><b>目标匹配</b><span>是否符合产品类型、目标用户、页面任务和品牌定位。</span></div>
+<div class="score-card"><span class="score">20</span><b>布局层级</b><span>核心信息是否突出，模块顺序、留白和信息密度是否合理。</span></div>
+<div class="score-card"><span class="score">15</span><b>可读可用</b><span>文字、按钮、图标和数据是否清楚并符合真实使用。</span></div>
+<div class="score-card"><span class="score">15</span><b>视觉一致</b><span>颜色、圆角、阴影、图标、图片和组件是否统一。</span></div>
+<div class="score-card"><span class="score">15</span><b>内容真实</b><span>文案、数据、状态、图标含义和图片场景是否可信。</span></div>
+<div class="score-card"><span class="score">15</span><b>落地与合规</b><span>是否可在 Figma / 前端重建，并避免版权和品牌风险。</span></div>
+</div>
+<div class="cards-3" style="margin-top:18px;">
+<div class="card">
+<h3>先看大问题</h3>
+<ul><li>产品气质是否正确。</li><li>页面结构是否支持核心任务。</li><li>信息层级是否清楚。</li></ul>
+<div class="marker-row"><span class="marker">方向</span><span class="marker">结构</span><span class="marker">层级</span></div>
+</div>
+<div class="card">
+<h3>再看中问题</h3>
+<ul><li>组件语言是否一致。</li><li>内容密度是否合理。</li><li>文案、数据和图标是否可信。</li></ul>
+<div class="marker-row"><span class="marker blue">组件</span><span class="marker blue">内容</span><span class="marker blue">可读</span></div>
+</div>
+<div class="card">
+<h3>最后看小问题</h3>
+<ul><li>间距、对齐、圆角和阴影。</li><li>局部配色、材质和装饰。</li><li>图片裁切和细节质感。</li></ul>
+<div class="marker-row"><span class="marker sage">间距</span><span class="marker sage">质感</span><span class="marker sage">细节</span></div>
+</div>
+</div>
+<div class="table-card" style="margin-top:18px;">
+<h3>常见问题与修改指令</h3>
+<div class="compare-table">
+<div class="table-row header"><div>问题</div><div>不要只说</div><div>更有效的修改方式</div></div>
+<div class="table-row"><div data-label="问题">信息太乱</div><div data-label="不要只说">“简洁一点。”</div><div data-label="更有效的修改方式">保留三个核心模块，删除装饰卡片，增加区域间距，强化主数据。</div></div>
+<div class="table-row"><div data-label="问题">风格不统一</div><div data-label="不要只说">“高级一点。”</div><div data-label="更有效的修改方式">统一为低饱和蓝灰色、相同圆角、同一图标线宽，减少渐变和发光。</div></div>
+<div class="table-row"><div data-label="问题">结构不合理</div><div data-label="不要只说">“重新做布局。”</div><div data-label="更有效的修改方式">保持顶部导航，把主任务卡上移，辅助数据合并为一行，底部只保留一个 CTA。</div></div>
+<div class="table-row"><div data-label="问题">内容不真实</div><div data-label="不要只说">“修一下文字。”</div><div data-label="更有效的修改方式">替换为简短中文文案，使用真实单位，移除无法解释的数据和无意义图标。</div></div>
+</div>
+</div>
+<div class="flow-card" style="margin-top:18px;">
+<div class="flow-title"><h3>推荐的迭代顺序</h3><span class="flow-tag">Large → Small</span></div>
+<div class="flow-steps">
+<div class="flow-step"><b>1 定方向</b><span>产品气质和整体风格。</span></div>
+<div class="flow-step"><b>2 调结构</b><span>页面模块、层级和密度。</span></div>
+<div class="flow-step"><b>3 修内容</b><span>文案、数据、图标和图片。</span></div>
+<div class="flow-step"><b>4 统一组件</b><span>按钮、卡片、状态和样式。</span></div>
+<div class="flow-step"><b>5 优化细节</b><span>间距、对齐、色彩和质感。</span></div>
+<div class="flow-step"><b>6 进入 Figma</b><span>重建真实设计系统。</span></div>
+</div>
+</div>
+<div class="compare-list" style="margin-top:18px;">
+<div class="compare-row">
+<div class="compare-side"><b>AI UI 概念图</b><span>用于探索视觉方向、布局可能性和方案沟通，允许存在部分不真实细节。</span></div>
+<div class="vs">≠</div>
+<div class="compare-side"><b>最终 UI 设计稿</b><span>需要真实内容、完整状态、统一组件、适配规则、无障碍和开发可实现性。</span></div>
+</div>
+</div>
+<div class="module-footer">
+<div class="summary-box"><h3>评价口诀</h3><p>先问“对不对”，再问“清不清”，最后问“美不美、能不能落地”。</p></div>
+<div class="question-box"><h3>方案比较</h3><p>对三张同题生成图分别打分，再说明选择依据。评价中至少包含一个功能问题和一个视觉问题。</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="practice">
+<div class="section-shell">
+<div class="section-head">
+<div>
+<span class="section-tag">07 / PRACTICE TASK</span>
+<h2>实践任务：围绕同一页面主题，生成、比较并优化 3 个 UI 方向。</h2>
+</div>
+<p class="section-desc">练习重点不是一次生成完美，而是训练需求拆解、Prompt 表达、变量控制、方案比较和修改反馈。</p>
+</div>
+<div class="flow-card practice-path">
+<div class="flow-title">
+<h3>实践路径</h3>
+<span class="flow-tag">定义 → 生成 → 比较 → 优化</span>
+</div>
+<div class="flow-steps">
+<div class="flow-step"><b>01 选择主题</b><span>确定产品类型、目标页面、目标用户和核心任务。</span></div>
+<div class="flow-step"><b>02 拆解结构</b><span>列出页面模块、内容优先级、关键操作和必要状态。</span></div>
+<div class="flow-step"><b>03 编写 Prompt</b><span>补充视觉风格、画布比例、真实内容、参考与限制条件。</span></div>
+<div class="flow-step"><b>04 生成三版</b><span>保持页面目标一致，每版只改变一个主要视觉方向。</span></div>
+<div class="flow-step"><b>05 评价优化</b><span>按统一标准筛选一版，并完成一轮定向修改。</span></div>
+</div>
+</div>
+<div class="cards-4" style="margin-top:18px;">
+<div class="step"><div class="step-num">01</div><h3>选择主题</h3><p>从健康、教育、电商、效率工具或旅行中选择一个产品页面，说明谁在什么场景下使用。</p></div>
+<div class="step"><div class="step-num">02</div><h3>建立 Brief</h3><p>写出核心任务、必备模块、真实内容、画布比例和视觉关键词。</p></div>
+<div class="step"><div class="step-num">03</div><h3>生成 3 个方向</h3><p>保持页面目标和结构一致，只改变极简、科技、Bento、柔和生活方式等视觉语言。</p></div>
+<div class="step"><div class="step-num">04</div><h3>点评并优化</h3><p>根据目标、布局、可读、一致和落地性选择一版，并用定向指令完成一轮修改。</p></div>
+</div>
+<div class="task-grid" style="margin-top:18px;">
+<div class="table-card">
+<h3>实践产出清单</h3>
+<ul class="check-list">
+<li><b>基础 Brief：</b>产品、用户、页面目标和必备模块。</li>
+<li><b>基础 Prompt：</b>完整 8 段信息，不只是风格关键词。</li>
+<li><b>三张概念图：</b>三个方向有清晰、可说明的差异。</li>
+<li><b>变量记录：</b>说明每一版改变了哪些条件。</li>
+<li><b>评价表：</b>按照六个维度打分并写出取舍。</li>
+<li><b>优化版本：</b>保留有效部分，完成一次定向修改。</li>
+</ul>
+</div>
+<div class="table-card">
+<h3>方案评价参考</h3>
+<div class="compare-table">
+<div class="table-row header"><div>维度</div><div>检查问题</div><div>建议权重</div></div>
+<div class="table-row"><div data-label="维度">目标匹配</div><div data-label="检查问题">是否符合产品、用户和页面任务。</div><div data-label="建议权重">25%</div></div>
+<div class="table-row"><div data-label="维度">布局层级</div><div data-label="检查问题">结构是否清楚，核心信息是否突出。</div><div data-label="建议权重">25%</div></div>
+<div class="table-row"><div data-label="维度">视觉一致</div><div data-label="检查问题">颜色、组件、图标和材质是否统一。</div><div data-label="建议权重">20%</div></div>
+<div class="table-row"><div data-label="维度">可读可用</div><div data-label="检查问题">文字、按钮、数据和状态是否清晰合理。</div><div data-label="建议权重">20%</div></div>
+<div class="table-row"><div data-label="维度">创新表达</div><div data-label="检查问题">是否有记忆点，同时不过度装饰。</div><div data-label="建议权重">10%</div></div>
+</div>
+</div>
+</div>
+<div class="cards-3" style="margin-top:18px;">
+<div class="card"><h3>可选主题 A：健康 App</h3><ul><li>首页展示健康数据和今日任务。</li><li>方向：治愈生活、专业医疗、运动科技。</li><li>重点：数据层级和行动入口。</li></ul></div>
+<div class="card"><h3>可选主题 B：学习工具</h3><ul><li>首页展示课程、进度和待办。</li><li>方向：极简效率、年轻活力、知识杂志。</li><li>重点：任务优先级和信息密度。</li></ul></div>
+<div class="card"><h3>可选主题 C：电商活动</h3><ul><li>首页展示主视觉、商品和优惠信息。</li><li>方向：高端品质、国潮节日、年轻潮流。</li><li>重点：视觉吸引、价格信息和转化路径。</li></ul></div>
+</div>
+<div class="module-footer">
+<div class="teach-note"><h3>方案复盘顺序</h3><p>先说明目标和选择依据，再记录反馈，最后从目标、结构、视觉和落地四个层面复盘，不只评价“好不好看”。</p></div>
+<div class="summary-box"><h3>继续完善</h3><p>把选中的概念图带入 Figma，重建一个完整页面，并补充组件状态、真实文案、网格和设计规范。</p></div>
+</div>
+</div>
+</section>
+</main>
+<section class="final-cta">
+<h2>核心结论：AI 负责扩展视觉可能性，设计师负责定义问题、控制方向并完成真实落地。</h2>
+<p>先认识模型边界，再选择合适输入；用结构化 Prompt 控制任务，用统一评价标准筛选结果，最后把概念图重建为真实、可用、可交付的设计。</p>
+<div class="hero-actions" style="justify-content:center;">
+<a class="btn btn-primary" href="#top">返回顶部</a>
+<a class="btn btn-secondary" href="#practice">查看练习要求</a>
+</div>
+</section>
+</div>
+</body>
+</html>
