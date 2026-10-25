@@ -6,12 +6,12 @@
   <title>AI设计学习导航</title>
   <style>
     :root {
-      color-scheme: dark;
-      --sidebar: #171922;
-      --sidebar-muted: #aeb2c1;
-      --sidebar-active: #2f6df6;
-      --surface: #eef1f6;
-      --line: #d9deea;
+      color-scheme: light;
+      --sidebar: #fffaf2;
+      --sidebar-muted: #6b6258;
+      --sidebar-active: #f3ddd4;
+      --surface: #f6efe4;
+      --line: #dfd0bd;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
@@ -26,13 +26,13 @@
       flex: 0 0 280px;
       display: flex;
       flex-direction: column;
-      background: var(--sidebar);
-      color: #fff;
-      border-right: 1px solid #2a2d39;
+      background: linear-gradient(180deg, #fffaf2 0%, #f6efe4 100%);
+      color: #25211d;
+      border-right: 1px solid #dfd0bd;
     }
     .brand {
       padding: 24px 22px 18px;
-      border-bottom: 1px solid #2a2d39;
+      border-bottom: 1px solid #dfd0bd;
     }
     .brand h1 { margin: 0; font-size: 19px; line-height: 1.4; letter-spacing: .02em; }
     .brand p { margin: 6px 0 0; color: var(--sidebar-muted); font-size: 12px; letter-spacing: .16em; }
@@ -44,7 +44,7 @@
     .nav-group { margin: 0 0 18px; }
     .nav-label {
       padding: 0 10px 8px;
-      color: #777d91;
+      color: #a85b4d;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: .08em;
@@ -55,9 +55,9 @@
       align-items: center;
       gap: 10px;
       border: 0;
-      border-radius: 9px;
+      border-radius: 14px;
       padding: 10px;
-      background: transparent;
+      background: rgba(255, 253, 248, 0.58);
       color: var(--sidebar-muted);
       cursor: grab;
       font: inherit;
@@ -67,30 +67,14 @@
       transition: background .16s ease, color .16s ease;
     }
     .nav-item:active { cursor: grabbing; }
-    .nav-item.dragging { opacity: .42; background: #30364a; }
-    .nav-item.drop-target { box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
-    .nav-item:hover, .nav-item:focus-visible { background: #252938; color: #fff; outline: none; }
-    .nav-item.active { background: var(--sidebar-active); color: #fff; box-shadow: 0 6px 18px rgba(47,109,246,.24); }
-    .nav-index { width: 22px; flex: 0 0 22px; color: #7f879b; font-size: 11px; text-align: center; }
-    .nav-item.active .nav-index { color: rgba(255,255,255,.82); }
-    .footer { padding: 12px 22px 16px; color: #72798b; font-size: 11px; line-height: 1.5; border-top: 1px solid #2a2d39; }
-    .content { min-width: 0; flex: 1; display: flex; flex-direction: column; }
-    .toolbar {
-      height: 48px;
-      flex: 0 0 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 0 16px;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
-      color: #5c6374;
-      font-size: 12px;
-    }
-    .current-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .open-link { color: #2f6df6; text-decoration: none; white-space: nowrap; }
-    .open-link:hover { text-decoration: underline; }
+    .nav-item.dragging { opacity: .42; background: #f3ddd4; }
+    .nav-item.drop-target { box-shadow: inset 0 0 0 1px rgba(168, 91, 77, .28); }
+    .nav-item:hover, .nav-item:focus-visible { background: rgba(243, 221, 212, .64); color: #a85b4d; outline: none; }
+    .nav-item.active { background: var(--sidebar-active); color: #a85b4d; box-shadow: 0 8px 22px rgba(168, 91, 77, .14); }
+    .nav-index { width: 22px; flex: 0 0 22px; color: #a99686; font-size: 11px; text-align: center; }
+    .nav-item.active .nav-index { color: #a85b4d; }
+    
+    .content { min-width: 0; flex: 1; display: flex; flex-direction: column; background: #f6efe4; }
     iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: #fff; }
     @media (max-width: 760px) {
       .sidebar { width: 220px; flex-basis: 220px; }
@@ -98,7 +82,6 @@
       .brand h1 { font-size: 16px; }
       .nav { padding: 12px 8px 18px; }
       .nav-item { padding: 9px 8px; font-size: 12px; }
-      .footer { padding: 10px 16px 14px; }
     }
   </style>
 </head>
@@ -145,10 +128,6 @@
     </nav>
   </aside>
   <main class="content">
-    <div class="toolbar">
-      <span class="current-title" id="currentTitle">请选择左侧页面</span>
-      <a class="open-link" id="openLink" href="#" target="_blank" rel="noopener">新窗口打开</a>
-    </div>
     <iframe id="pageFrame" title="课程内容" src="about:blank"></iframe>
   </main>
   <script>
@@ -157,8 +136,6 @@
       const courseGroup = document.querySelector('.nav-group');
       const courseItems = () => [...courseGroup.querySelectorAll('.course-item')];
       const frame = document.getElementById('pageFrame');
-      const title = document.getElementById('currentTitle');
-      const openLink = document.getElementById('openLink');
       const orderStorageKey = 'youshe-ui-course-order-v1';
       let dragged = null;
       let currentItem = null;
@@ -222,8 +199,6 @@
         const page = item.dataset.page;
         frame.src = page;
         frame.title = item.dataset.title;
-        title.textContent = item.dataset.title;
-        openLink.href = page;
         if (updateHash) location.hash = encodeURIComponent(page);
       }
 
